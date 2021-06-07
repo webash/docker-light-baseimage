@@ -1,0 +1,58 @@
+#!/bin/sh -e
+
+# set -x (bash debug) if log level is trace
+# https://github.com/osixia/docker-light-baseimage/blob/master/image/tool/log-helper
+log-helper level eq trace && set -x
+
+# Usage :
+# RUN /container/tool/envsubst-templates dir [output-dir] [file-suffix]
+
+DIR=${1:-$ENVSUBST_DIR}
+OUTPUT_DIR=${2:-$ENVSUBST_TEMPLATES_OUTPUT_DIR}
+FILE_SUFFIX=${3:-$ENVSUBST_TEMPLATES_FILE_SUFFIX}
+
+DEFAULT_FILE_SUFFIX=".tmpl"
+
+if [ -z "${DIR}" ]; then 
+	log-helper error "Templates directory is not set"
+	exit 1
+fi
+
+if [ ! -d "${DIR}" ]; then
+	log-helper error "Template directory ${DIR} does not exist"
+	exit 1
+fi
+
+log-helper info "Going to use template directory ${DIR}"
+
+if [ -z "${OUTPUT_DIR}" ]; then 
+	log-helper info "Template output directory is not set, output will set in template directory ${DIR}"
+	OUTPUT_DIR=${DIR}
+fi
+
+if [ -z "${FILE_SUFFIX}" ]; then
+	log-helper info "Template suffix is not set, going to use ${DEFAULT_FILE_SUFFIX}"
+	FILE_SUFFIX=${DEFAULT_FILE_SUFFIX}
+fi
+
+log-helper debug "Create ${DEFAULT_FILE_SUFFIX} directory"
+mkdir -p "${OUTPUT_DIR}"
+
+DEFINED_ENVS=$(printf '${%s} ' $(env | cut -d= -f1))
+log-helper debug "Defined environment variables: ${DEFINED_ENVS}"
+
+find "${DIR}" -follow -type f -name "*${FILE_SUFFIX}" -print | while read -r TEMPLATE; do
+	RELATIVE_PATH="${TEMPLATE#$DIR/}"
+	OUTPUT_PATH="$OUTPUT_DIR/${RELATIVE_PATH%$FILE_SUFFIX}"
+	SUBDIR=$(dirname "$RELATIVE_PATH")
+
+	log-helper info "Running envsubst on ${TEMPLATE} to ${OUTPUT_PATH}"
+	
+	if [ -e "${OUTPUT_PATH}" ]; then 
+		log-helper warning "Output file ${OUTPUT_PATH} already exits and is going to be replaced"
+	fi
+
+	mkdir -p "${OUTPUT_DIR}/${SUBDIR}"
+
+	envsubst "${DEFINED_ENVS}" < "${TEMPLATE}" > "${OUTPUT_PATH}"
+done

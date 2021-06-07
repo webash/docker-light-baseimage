@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.4.0] - Unreleased
+### Added
+  - envsubst-templates tool
+  - gettext-base package
+
 ## [1.3.3] - 2021-03-13
 ### Changed
   - Multiple log line message are now split and log line by line for a nicest display.
