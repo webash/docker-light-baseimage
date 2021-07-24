@@ -39,9 +39,11 @@ Table of Contents
       - [Overview](#overview-2)
       - [Dockerfile](#dockerfile-1)
       - [Service files](#service-files-1)
-        - [install.sh](#installsh)
+        - [install.sh](#installsh-1)
         - [process.sh](#processsh-1)
+        - [config/default](#configdefault)
       - [Build and test](#build-and-test-1)
+    - [Run extra command](#run-extra-command)
   - [Images Based On Light-Baseimage](#images-based-on-light-baseimage)
   - [Image Assets](#image-assets)
     - [Tools](#tools)
@@ -56,6 +58,7 @@ Table of Contents
         - [Run directory setup](#run-directory-setup)
         - [Startup files environment setup](#startup-files-environment-setup)
         - [Startup files execution](#startup-files-execution)
+        - [Process environment setup](#process-environment-setup)
         - [Process execution](#process-execution)
           - [Single process image](#single-process-image)
           - [Multiple process image](#multiple-process-image)
@@ -470,7 +473,7 @@ Make sure process.sh can be executed (chmod +x process.sh).
 
 That why we run php  with `--nodaemonize"`
 
-##### config/default
+##### config/default
 nginx server configuration:
 
     server {
@@ -519,6 +522,14 @@ Go to [http://localhost:8080/phpinfo.php](http://localhost:8080/phpinfo.php)
 
 So we have a container with two process supervised by runit running in our container!
 
+### Run extra command
+
+This image provide several command line options to run commands at diferent time of container lifecycle.
+But the simplest way to run an extra command is :
+
+    docker run osixia/light-baseimage:1.3.3 -- /bin/sh -c "echo Hi!"
+
+Please refer to [Run command line options](#run-command-line-options) for more information.
 
 ## Images Based On Light-Baseimage
 
@@ -526,11 +537,9 @@ Single process images:
 - [osixia/openldap](https://github.com/osixia/docker-openldap)
 - [osixia/keepalived](https://github.com/osixia/docker-keepalived)
 - [osixia/tinc](https://github.com/osixia/docker-tinc)
-- [osixia/registry-ldap-auth](https://github.com/osixia/docker-registry-ldap-auth)
 - [osixia/cfssl-multirootca](https://github.com/osixia/docker-cfssl-multirootca)
 - [osixia/backup](https://github.com/osixia/docker-backup)
 - [osixia/backup-manager](https://github.com/osixia/docker-backup-manager)
-- [osixia/mmc-agent](https://github.com/osixia/docker-mmc-agent)
 
 Multiple process images:
 - [osixia/openldap-backup](https://github.com/osixia/docker-openldap-backup)
@@ -543,11 +552,6 @@ Multiple process images:
 - [osixia/keepalived-confd](https://github.com/osixia/docker-keepalived-confd)
 - [osixia/tinc-etcd](https://github.com/osixia/docker-tinc-etcd)
 - [osixia/postfix-gateway-confd](https://github.com/osixia/docker-postfix-gateway-confd)
-- [osixia/mmc-mail](https://github.com/osixia/docker-mmc-mail)
-- [osixia/mmc-web](https://github.com/osixia/docker-mmc-web)
-
-Image adding light-baseimage tools to an existing image
-- [osixia/gitlab](https://github.com/osixia/docker-gitlab)
 
 Send me a message to add your image in this list.
 
@@ -664,17 +668,19 @@ What it does:
 
     docker run osixia/light-baseimage:1.3.3 --help
     usage: run [-h] [-e] [-s] [-p] [-f] [-o {startup,process,finish}]
-               [-c COMMAND [WHEN={startup,process,finish} ...]] [-k]
-               [--wait-state FILENAME] [--wait-first-startup] [--keep-startup-env]
-               [--copy-service] [--dont-touch-etc-hosts] [--keepalive]
-               [--keepalive-force] [-l {none,error,warning,info,debug,trace}]
-               [MAIN_COMMAND [MAIN_COMMAND ...]]
+           [--pre-startup-cmd COMMAND] [--pre-process-cmd COMMAND]
+           [--pre-finish-cmd COMMAND] [--pre-exit-cmd COMMAND] [-k]
+           [--wait-state FILENAME] [--wait-first-startup] [--keep-startup-env]
+           [--copy-service] [--dont-touch-etc-hosts] [--keepalive]
+           [--keepalive-force] [-l {none,error,warning,info,debug,trace}]
+           [MAIN_COMMAND [MAIN_COMMAND ...]]
 
     Initialize the system.
 
     positional arguments:
       MAIN_COMMAND          The main command to run, leave empty to only run
-                            container process.
+                            container process. Otherwise this command is run
+                            before startup scripts.
 
     optional arguments:
       -h, --help            show this help message and exit
@@ -689,13 +695,18 @@ What it does:
                             Skip running container finish file(s).
       -o {startup,process,finish}, --run-only {startup,process,finish}
                             Run only this file type and ignore others.
-      -c COMMAND [WHEN={startup,process,finish} ...], --cmd COMMAND [WHEN={startup,process,finish} ...]
-                            Run this command before WHEN file(s). Default before
-                            startup file(s).
+      --pre-startup-cmd COMMAND
+                            Run COMMAND before startup file(s).
+      --pre-process-cmd COMMAND
+                            Run COMMAND before process file(s).
+      --pre-finish-cmd COMMAND
+                            Run COMMAND before finish file(s).
+      --pre-exit-cmd COMMAND
+                            Run COMMAND before container exits.
       -k, --no-kill-all-on-exit
                             Don't kill all processes on the system upon exiting.
       --wait-state FILENAME
-                            Wait until the container state file exists in
+                            Wait until the container FILENAME file exists in
                             /container/run/state directory before starting.
                             Usefull when 2 containers share /container/run
                             directory via volume.
@@ -716,7 +727,6 @@ What it does:
                             Log level (default: info)
 
     Osixia! Light Baseimage: https://github.com/osixia/docker-light-baseimage
-
 
 ##### Run directory setup
 *Run tool* will create if they not exists the following directories:
@@ -742,7 +752,7 @@ After each time *run tool* runs a startup script, it resets its own environment 
 
 After all startup script *run tool* run /container/run/startup.sh if exists.
 
-##### Process environment setup
+##### Process environment setup
 *Run tool* delete all .startup.yaml and .startup.json in /container/environment/* and clear the previous run environment (/container/run/environment is removed)
 Then it takes all remaining file in /container/environment/* and import the variables values to the container environment.
 The container environment is then exported to /container/run/environment and in /container/run/environment.sh

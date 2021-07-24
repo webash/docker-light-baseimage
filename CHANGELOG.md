@@ -4,6 +4,13 @@
 ### Added
   - envsubst-templates tool
   - gettext-base package
+  - --pre-startup-cmd, --pre-process-cmd, --pre-finish-cmd and --pre-exit-cmd commands
+
+### Changed
+  - Now main_command is run even in single process and multiple process images as pre-startup command
+
+### Removed
+  - -c,--cmd command
 
 ## [1.3.3] - 2021-03-13
 ### Changed
