@@ -8,6 +8,7 @@
 
 ### Changed
   - Now main_command is run even in single process and multiple process images as pre-startup command
+  - Upgrade CFSSL version to 1.6.1
 
 ### Removed
   - -c,--cmd command

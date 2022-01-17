@@ -210,9 +210,9 @@ For example at run time we would like to introduce ourselves so we will use an e
     FIRST_START_DONE="${CONTAINER_STATE_DIR}/nginx-first-start-done"
 
     # container first start
-    if [ ! -e "$FIRST_START_DONE" ]; then
+    if [ ! -e "${FIRST_START_DONE}" ]; then
       echo "I'm ${WHO_AM_I}."  >> /var/www/html/index.html
-      touch $FIRST_START_DONE
+      touch "${FIRST_START_DONE}"
     fi
 
     exit 0
@@ -267,19 +267,19 @@ And try to get its value in **startup.sh** script:
     FIRST_START_DONE="${CONTAINER_STATE_DIR}/nginx-first-start-done"
 
     # container first start
-    if [ ! -e "$FIRST_START_DONE" ]; then
-      echo ${WHO_AM_I}  >> /var/www/html/index.html
-      touch $FIRST_START_DONE
+    if [ ! -e "${FIRST_START_DONE}" ]; then
+      echo "${WHO_AM_I}"  >> /var/www/html/index.html
+      touch "${FIRST_START_DONE}"
     fi
 
-    echo "The secret is: $FIRST_START_SETUP_ONLY_SECRET"
+    echo "The secret is: ${FIRST_START_SETUP_ONLY_SECRET}"
 
     exit 0
 
 And in **process.sh** script:
 
     #!/bin/bash -e
-    echo "The secret is: $FIRST_START_SETUP_ONLY_SECRET"
+    echo "The secret is: ${FIRST_START_SETUP_ONLY_SECRET}"
     exec /usr/sbin/nginx -g "daemon off;"
 
 Ok it's time for the show!
@@ -355,7 +355,7 @@ Refresh [http://localhost:8080/](http://localhost:8080/) and you should see:
 
 #### Overview
 
-This example takes back the single process image example and add php7.0-fpm to run php scripts.
+This example takes back the single process image example and add php7.4-fpm to run php scripts.
 
 See complete example in: [example/multiple-process-image](example/multiple-process-image)
 
@@ -364,7 +364,7 @@ Note: it would have been  ♪ ~~harder~~, faster, better, stronger ♪ to extend
 So here the image directory structure:
 
  - **multiple-process-image**: root directory
- - **multiple-process-image/service**: directory to store the nginx and php7.0-fpm service.
+ - **multiple-process-image/service**: directory to store the nginx and php7.4-fpm service.
  - **multiple-process-image/environment**: environment files directory.
  - **multiple-process-image/Dockerfile**: the Dockerfile to build this image.
 
@@ -386,7 +386,7 @@ Let's now create the nginx and php directories:
 
 In the Dockerfile we are going to:
   - Add the multiple process stack
-  - Download nginx and php7.0-fpm from apt-get.
+  - Download nginx and php7.4-fpm from apt-get.
   - Add the service directory to the image.
   - Install service and clean up.
   - Add the environment directory to the image.
@@ -397,13 +397,13 @@ In the Dockerfile we are going to:
         # https://github.com/osixia/docker-light-baseimage
         FROM osixia/light-baseimage:1.3.3
 
-        # Install multiple process stack, nginx and php7.0-fpm and clean apt-get files
+        # Install multiple process stack, nginx and php7.4-fpm and clean apt-get files
         # https://github.com/osixia/docker-light-baseimage/blob/stable/image/tool/add-multiple-process-stack
         RUN apt-get -y update \
             && /container/tool/add-multiple-process-stack \
             && LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
                 nginx \
-                php7.0-fpm \
+                php7.4-fpm \
             && apt-get clean \
             && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
@@ -424,7 +424,7 @@ In the Dockerfile we are going to:
         EXPOSE 80 443
 
 
-The Dockerfile contains directives to download nginx and php7.0-fpm from apt-get but all the initial setup will take place in install.sh file (called by /container/tool/install-service tool) for a better build experience. The time consuming download task is decoupled from the initial setup to make great use of docker build cache. If an install.sh file is changed the builder will not have to download again nginx and php7.0-fpm add will just run install scripts.
+The Dockerfile contains directives to download nginx and php7.4-fpm from apt-get but all the initial setup will take place in install.sh file (called by /container/tool/install-service tool) for a better build experience. The time consuming download task is decoupled from the initial setup to make great use of docker build cache. If an install.sh file is changed the builder will not have to download again nginx and php7.4-fpm add will just run install scripts.
 
 Maybe you already read that in the previous example ?Sorry.
 
@@ -442,10 +442,10 @@ In this example, for the initial setup we set some php default configuration, re
     # this script is run during the image build
 
     # config
-    sed -i -e "s/expose_php = On/expose_php = Off/g" /etc/php/7.0/fpm/php.ini
-    sed -i -e "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/g" /etc/php/7.0/fpm/php.ini
-    sed -i -e "s/;listen.owner = www-data/listen.owner = www-data/g" /etc/php/7.0/fpm/php.ini
-    sed -i -e "s/;listen.group = www-data/listen.group = www-data/g" /etc/php/7.0/fpm/php.ini
+    sed -i -e "s/expose_php = On/expose_php = Off/g" /etc/php/7.4/fpm/php.ini
+    sed -i -e "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/g" /etc/php/7.4/fpm/php.ini
+    sed -i -e "s/;listen.owner = www-data/listen.owner = www-data/g" /etc/php/7.4/fpm/php.ini
+    sed -i -e "s/;listen.group = www-data/listen.group = www-data/g" /etc/php/7.4/fpm/php.ini
 
     # create php socket directory
     mkdir -p /run/php
@@ -465,11 +465,11 @@ Make sure install.sh can be executed (chmod +x install.sh).
 This file define the command to run:
 
     #!/bin/bash -e
-    exec /usr/sbin/php-fpm7.0 --nodaemonize
+    exec /usr/sbin/php-fpm7.4 --nodaemonize
 
 Make sure process.sh can be executed (chmod +x process.sh).
 
-*Caution: The command executed must start a foreground process otherwise runit (use to supervise multiple process images) will  keep restarting php-fpm7.0.*
+*Caution: The command executed must start a foreground process otherwise runit (use to supervise multiple process images) will keep restarting php-fpm7.4.*
 
 That why we run php  with `--nodaemonize"`
 
@@ -496,7 +496,7 @@ nginx server configuration:
       location ~ \.php$ {
         fastcgi_split_path_info ^(.+\.php)(/.+)$;
         # With php fpm:
-        fastcgi_pass unix:/run/php/php7.0-fpm.sock;
+        fastcgi_pass unix:/run/php/php7.4-fpm.sock;
         fastcgi_index index.php;
         include fastcgi_params;
         include fastcgi.conf;
@@ -607,7 +607,7 @@ Here simple Dockerfile example how to add a service-available to an image:
             && /container/tool/add-service-available :ssl-tools :cron \
             && LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
                nginx \
-               php7.0-fpm
+               php7.4-fpm
         ...
 
 
