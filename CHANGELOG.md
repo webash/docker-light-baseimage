@@ -7,6 +7,7 @@
   - --pre-startup-cmd, --pre-process-cmd, --pre-finish-cmd and --pre-exit-cmd commands
 
 ### Changed
+  - Use debian bullseye-slim as baseimage
   - Now main_command is run even in single process and multiple process images as pre-startup command
   - Upgrade CFSSL version to 1.6.1
 
