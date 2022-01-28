@@ -1,0 +1,121 @@
+#!/usr/bin/python3 -u
+
+# Usage:
+# install-services
+
+import os
+import os.path
+import subprocess
+
+SERVICE_DIR = "/container/service"
+
+INSTALL_FILENAME = "install.sh"
+STARTUP_FILENAME = "startup.sh"
+PROCESS_FILENAME = "process.sh"
+FINISH_FILENAME = "finish.sh"
+
+# keep sync with values in run file
+RUN_DIR = "/container/run"
+RUN_STARTUP_DIR = RUN_DIR + "/startup"
+RUN_PROCESS_DIR = RUN_DIR + "/process"
+RUN_FINISH_DIR = RUN_DIR + "/finish"
+
+
+def install(script):
+    if not os.path.isfile(script):
+        return
+
+    print("Running " + script + "...")
+    subprocess.run(script, shell=True)
+
+    print("Remove " + script)
+    os.remove(script)
+
+
+def link(script, dest):
+    if not os.path.isfile(script):
+        return
+
+    if not os.access(script, os.X_OK):
+        print("Error : file " + script + " needs executable permission")
+        exit(1)
+
+    if os.path.islink(dest) and os.readlink(dest) == script:
+        return
+
+    try:
+        os.makedirs(os.path.dirname(dest), exist_ok=True)
+        os.symlink(script, dest)
+        print("Link " + script + " to " + dest)
+    except OSError as e:
+        print("Error : failed to link " + script + " to " + dest + " : " + str(e))
+        print_write_error_helper_and_exit()
+
+
+def print_write_error_helper_and_exit():
+    print("If this error is displayed during container run this may be because the container filesystem is read only. Consider adding \"RUN /container/tools/install-services\" in the Dockerfile. Dynamically adding new service in readonly container is not supported.")
+    print("If this error is displayed during image build, follow recommendations to fix the build process.")
+    exit(1)
+
+print("Running install-services...")
+
+# Run /container/service/install.sh
+install(os.path.join(SERVICE_DIR, INSTALL_FILENAME))
+
+# Run install.sh scripts of /container/service/*
+# Link startup.sh scripts of /container/service/* to /container/run/startup/*
+# Link process.sh scripts of /container/service/* to /container/run/process/*/run
+# Link finish.sh scripts of /container/service/* to /container/run/finish/*
+for service in sorted(os.listdir(SERVICE_DIR)):
+    service_directory = os.path.join(SERVICE_DIR, service)
+
+    install(os.path.join(service_directory, INSTALL_FILENAME))
+
+    scripts_to_link = {
+        os.path.join(service_directory, STARTUP_FILENAME): os.path.join(RUN_STARTUP_DIR, service),
+        os.path.join(service_directory, PROCESS_FILENAME): os.path.join(RUN_PROCESS_DIR, service, "run"),
+        os.path.join(service_directory, FINISH_FILENAME): os.path.join(RUN_FINISH_DIR, service)
+    }
+
+    for script, dest in scripts_to_link.items():
+        link(script, dest)
+
+
+# Check all existing links in run directories
+for run_dir in (RUN_STARTUP_DIR, RUN_PROCESS_DIR, RUN_FINISH_DIR):
+    for subdir, _, files in sorted(os.walk(run_dir)):
+        for file in files:
+            filepath = os.path.join(subdir, file)
+
+            if os.path.islink(file):
+                real_path = os.readlink(file)
+
+                if not os.path.exists(real_path):
+                    try:
+                        # special case for process script that are in a subdirectory named after the service name in RUN_PROCESS_DIR
+                        # we remove the subdirectory
+                        if(file.startswith(RUN_PROCESS_DIR)):
+                            file = os.path.dirname(file)
+
+                        print("Remove " + file)
+                        os.remove(file)
+
+                    except OSError as e:
+                        print("Error : failed to remove " + file + " : " + str(e))
+                        print_write_error_helper_and_exit()
+
+                if not os.access(file, os.X_OK):
+                    print("Error : file " + file + " needs executable permission")
+                    exit(1)
+
+nb_process = len(os.listdir(RUN_PROCESS_DIR))
+print(str(nb_process) + " process found.")
+
+# Multiple process image
+if nb_process > 1:
+    if not os.path.exists("/container/multiple_process_stack_added"):
+        print("This image has multiple process.")
+        subprocess.run("apt update", shell=True)
+        subprocess.run("/container/tools/add-multiple-process-stack", shell=True)
+        print("For better image build process consider adding:")
+        print("\"RUN apt update && /container/tools/add-multiple-process-stack\" in the Dockerfile.")

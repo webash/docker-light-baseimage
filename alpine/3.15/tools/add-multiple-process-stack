@@ -1,0 +1,9 @@
+#!/bin/bash -e
+log-helper level eq trace && set -x
+
+# Usage:
+# add-multiple-process-stack
+
+echo "Install the multiple process stack: runit, syslog-ng-core, logrotate and cron"
+/container/tools/add-service-available :runit :syslog-ng-core :logrotate :cron
+touch /container/multiple_process_stack_added

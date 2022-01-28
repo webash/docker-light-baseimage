@@ -1,0 +1,16 @@
+#!/bin/bash -e
+log-helper level eq trace && set -x
+
+# Usage:
+# install-debug-tool [extra package 1] [extra package 2] ...
+
+TO_INSTALL=(curl less procps psmisc strace vim-tiny)
+
+echo "Install debug tools :" "${TO_INSTALL[@]}"
+
+if [ -n "$@" ]; then 
+    echo "with extra package(s) : $@"
+    TO_INSTALL+=("$@")
+fi
+
+/container/tools/install-and-clean "${TO_INSTALL[@]}"

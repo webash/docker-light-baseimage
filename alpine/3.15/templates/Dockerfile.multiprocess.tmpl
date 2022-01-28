@@ -1,0 +1,19 @@
+FROM ${CONTAINER_IMAGE_NAME}:${CONTAINER_IMAGE_TAG}
+
+# Uncomment to add container environment variables used by generator
+# and help other people extend your image
+# ARG IMAGE_NAME=my-compagny
+# ARG IMAGE_TAG=1.0.0
+# ENV CONTAINER_IMAGE_NAME=${IMAGE_NAME} \
+#     CONTAINER_IMAGE_TAG=${IMAGE_TAG}
+
+RUN apt -y update \
+    && /container/tools/add-multiple-process-stack \
+    && install-and-clean \
+        [....]
+
+COPY services /container/services
+
+RUN /container/tools/install-services 
+
+COPY environment /container/environment/${ENVIRONMENT_DIRECTORY}

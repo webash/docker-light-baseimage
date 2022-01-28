@@ -1,0 +1,23 @@
+#!/bin/bash -e
+log-helper level eq trace && set -x
+
+# Usage:
+# install-and-clean [package1] [package2] ...
+
+export LC_ALL=C
+export DEBIAN_FRONTEND=noninteractive
+
+ARGS="$*"
+NO_RECOMMENDS="--no-install-recommends"
+RECOMMENDS="--install-recommends"
+if [[ $ARGS =~ $RECOMMENDS ]]; then
+    NO_RECOMMENDS=""
+    ARGS=${ARGS//${RECOMMENDS}/}
+fi
+
+echo "Install and clean : ${ARGS}"
+
+apt install -y ${NO_RECOMMENDS} ${ARGS} \
+    && apt-get -qy autoremove \
+    && apt-get clean \
+    && rm -r /var/lib/apt/lists/*

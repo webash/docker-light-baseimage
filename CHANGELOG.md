@@ -1,18 +1,28 @@
 # Changelog
 
-## [1.4.0] - Unreleased
+## [2.0.0] - Unreleased
 ### Added
+  - light-baseimage can now be used by container with read-only filesystem
+  - light-baseimage containers can now be run with non root user
   - envsubst-templates tool
   - gettext-base package
   - --pre-startup-cmd, --pre-process-cmd, --pre-finish-cmd and --pre-exit-cmd commands
+  - .env file support
 
 ### Changed
   - Use debian bullseye-slim as baseimage
   - Now main_command is run even in single process and multiple process images as pre-startup command
   - Upgrade CFSSL version to 1.6.1
+  - Rename environment variable KILL_PROCESS_TIMEOUT and KILL_ALL_PROCESSES_TIMEOUT to CONTAINER_KILL_PROCESS_TIMEOUT and CONTAINER_KILL_ALL_PROCESSES_TIMEOUT
 
 ### Removed
   - -c,--cmd command
+  - --wait-state and --wait-first-startup
+  - .yaml and .json environment file support in favor of .env files
+  - .startup.yaml and .startup.json environment files support (kubernetes initContainers can be used as replacement)
+  - complex-bash-env support and associated "#PYTHON2BASH:" and "#JSON2BASH:" tags for environment variables
+  - /container/run/environment directory and files, formally used to dump container environment
+  - ssl-tools (a dedicated docker image can be used as replacement)
 
 ## [1.3.3] - 2021-03-13
 ### Changed
@@ -143,7 +153,7 @@
   - Container startup script directory /etc/my_init.d/ moved to /container/run/startup
   - Container final startup script /etc/rc.local moved to /container/run/startup.sh
   - Rename install-multiple-process-stack to add-multiple-process-stack
-  - Rename install-service-available to add-service-available
+  - Rename install-services-available to add-service-available
 
 ### Removed
   - ssl-helper ssl-helper-openssl and ssl-helper-gnutls

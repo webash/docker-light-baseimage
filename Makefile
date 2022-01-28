@@ -1,31 +1,34 @@
-NAME = osixia/light-baseimage
-VERSION = 1.4.0-dev
+GIT_BRANCH_SLUG = $(shell git rev-parse --abbrev-ref HEAD | sed 's|/|-|g')
 
-.PHONY: build build-nocache test tag-latest push push-latest release git-tag-version
+export IMAGE_NAME = osixia/light-baseimage
+export IMAGE_VERSION = $(GIT_BRANCH_SLUG)
 
+DEBIAN_BULLSEYE_PATH = ./debian/bullseye
+ALPINE_315_PATH = ./alpine/3.15
+
+MAIN_IMAGE_PATH = $(DEBIAN_BULLSEYE_PATH)
+
+.PHONY: copy-distribution-shared-files
+copy-distribution-shared-files:
+	@echo Copy from $(MAIN_IMAGE_PATH) to $(ALPINE_315_PATH)
+	@cp -f $(MAIN_IMAGE_PATH)/Dockerfile $(ALPINE_315_PATH)/
+	@cp -f $(MAIN_IMAGE_PATH)/.dockerignore $(ALPINE_315_PATH)/
+	@cp -rf $(MAIN_IMAGE_PATH)/templates $(ALPINE_315_PATH)/
+	@find $(MAIN_IMAGE_PATH)/tools -type f ! -name install-and-clean -exec cp -t $(ALPINE_315_PATH)/tools {} +
+
+.PHONY: dagger-init
+dagger-init:
+	dagger project init
+	dagger project update
+
+.PHONY: build
 build:
-	docker build -f image/Dockerfile -t $(NAME):$(VERSION) --rm image
+	dagger do build
 
-build-nocache:
-	docker build -f image/Dockerfile -t $(NAME):$(VERSION) --no-cache --rm image
+.PHONY: build-debian
+build-debian:
+	dagger do build debian
 
-test:
-	env NAME=$(NAME) VERSION=$(VERSION) bats test/test.bats
-
-tag:
-	docker tag $(NAME):$(VERSION) $(NAME):$(VERSION)
-
-tag-latest:
-	docker tag $(NAME):$(VERSION) $(NAME):latest
-
-push:
-	docker push $(NAME):$(VERSION)
-
-push-latest:
-	docker push $(NAME):latest
-
-release: build test tag-latest push push-latest
-
-git-tag-version: release
-	git tag -a v$(VERSION) -m "v$(VERSION)"
-	git push origin v$(VERSION)
+.PHONY: build-alpine
+build-alpine:
+	dagger do build alpine

@@ -1,0 +1,8 @@
+# ignore all 
+*
+
+# except desired directories
+!build/
+!services-available/
+!templates/
+!tools/

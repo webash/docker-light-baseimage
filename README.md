@@ -1,23 +1,87 @@
-# osixia/light-baseimage
+# osixia/light-baseimage:2.0.0 🐳✨🌴
 
-[![Docker Pulls](https://img.shields.io/docker/pulls/osixia/light-baseimage.svg)][hub]
-[![Docker Stars](https://img.shields.io/docker/stars/osixia/light-baseimage.svg)][hub]
-[![](https://images.microbadger.com/badges/image/osixia/light-baseimage.svg)](http://microbadger.com/images/osixia/light-baseimage "Get your own image badge on microbadger.com")
+[docker hub]: https://hub.docker.com/r/osixia/light-baseimage
+[github]: https://github.com/osixia/docker-light-baseimage
 
-[hub]: https://hub.docker.com/r/osixia/light-baseimage/
+[![Docker Pulls](https://img.shields.io/docker/pulls/osixia/light-baseimage.svg?style=flat-square)][docker hub]
+[![Docker Stars](https://img.shields.io/docker/stars/osixia/light-baseimage.svg?style=flat-square)][docker hub]
+[![GitHub Stars](https://img.shields.io/github/stars/osixia/docker-light-baseimage?label=github%20stars&style=flat-square)][github]
+[![Contributors](https://img.shields.io/github/contributors/osixia/docker-light-baseimage?style=flat-square)](https://github.com/osixia/docker-light-baseimage/graphs/contributors)
 
-Latest release: 1.3.3 [Changelog](CHANGELOG.md)
- | [Docker Hub](https://hub.docker.com/r/osixia/light-baseimage/) 
+Debian 11 (Bullseye) and Alpine 3.15 based docker images to build reliable images quickly. 
+
+**This image provide a simple opinionated solution to build single or multiple process images with minimum of layers and an optimized build.**
+
+It helps speeding up image build time and CI/CD pipelines by providing:
+
+ - Greats building tools to **minimize the image number of layers and make best use of image build cache**.
+ - A nice init process as image entrypoint that add **helpfull extensions and options to fastly run and debug containers**.
+ - Simple way to create **multiple process images** if needed.
+
+## 🕐 Quick Start
+
+Run the following command to generate a Dockerfile and start building images based on light-baseimage:
+
+```
+# Debian
+docker run --rm osixia/light-baseimage:2.0.0 --generate dockerfile
+```
+```
+# Alpine
+docker run --rm osixia/light-baseimage:2.0.0-alpine --generate dockerfile
+```
+Replace `dockerfile` by `dagger.io` to get a minimal [dagger.io](https://dagger.io) example.
+
+## 📄 Documentation
+
+⚠ 2.0.0 release is out. Check the [1.x.x to 2.0.0 Migration Guide.]()
+
+See full documentation and complete feature list on osixia/light-basimage [documentation website.](https://opensource.osixia.net/containers/images/light-baseimage)
+
+## ♥ Contributing
+
+If you find this image useful here's how you can help:
+
+- Send a pull request with new features and bug fixes.
+- Help new users with [issues](https://github.com/osixia/docker-light-baseimage/issues) they may encounter.
+- Support the development of this image and star [this repo][github] and the image [docker hub repository.][docker hub]
+
+## 💥 Changelog
+
+Please refer to: [CHANGELOG.md](CHANGELOG.md)
+
+
+
+
+
+# osixia/light-baseimage ✨🌴
+
+![Docker Pulls](https://img.shields.io/docker/pulls/osixia/light-baseimage.svg?style=flat-square)
+![Docker Stars](https://img.shields.io/docker/stars/osixia/light-baseimage.svg?style=flat-square)
+![Docker Image Size](https://img.shields.io/docker/image-size/osixia/light-baseimage?style=flat-square)
+![Contributors](https://img.shields.io/github/contributors/osixia/docker-light-baseimage?style=flat-square)
 
 A **Debian 11 (Bullseye)** based docker image to build reliable image quickly. This image provide a simple opinionated solution to build multiple or single process image with minimum of layers and an optimized build.
 
 The aims of this image is to be used as a base for your own Docker images. It's base on the awesome work of: [phusion/baseimage-docker](https://github.com/phusion/baseimage-docker)
 
-Other base distribution are available:
-- [Alpine](https://github.com/osixia/docker-light-baseimage/tree/alpine) | [Docker Hub](https://hub.docker.com/r/osixia/alpine-light-baseimage/) | [![](https://images.microbadger.com/badges/image/osixia/alpine-light-baseimage.svg)](http://microbadger.com/images/osixia/alpine-light-baseimage "Get your own image badge on microbadger.com")
+```
+docker run osixia/light-baseimage:2.0.0 --help
+```
+
+Also available based on Alpine : [Documentation](https://github.com/osixia/docker-light-baseimage/tree/alpine)
+
+```
+docker run osixia/light-baseimage:alpine-2.0.0 --help
+```
 
 Table of Contents
-- [osixia/light-baseimage](#osixialight-baseimage)
+- [osixia/light-baseimage:2.0.0 🐳✨🌴](#osixialight-baseimage200-)
+  - [🕐 Quick Start](#-quick-start)
+  - [📄 Documentation](#-documentation)
+  - [♥ Contributing](#-contributing)
+  - [💥 Changelog](#-changelog)
+- [osixia/light-baseimage ✨🌴](#osixialight-baseimage-)
   - [Contributing](#contributing)
   - [Overview](#overview)
   - [Quick Start](#quick-start)
@@ -31,7 +95,7 @@ Table of Contents
         - [startup.sh](#startupsh)
         - [process.sh](#processsh)
       - [Environment files](#environment-files)
-        - [default.yaml](#defaultyaml)
+        - [.env](#env)
         - [default.startup.yaml](#defaultstartupyaml)
       - [Build and test](#build-and-test)
         - [Overriding default environment files at run time:](#overriding-default-environment-files-at-run-time)
@@ -44,14 +108,12 @@ Table of Contents
         - [config/default](#configdefault)
       - [Build and test](#build-and-test-1)
     - [Run extra command](#run-extra-command)
-  - [Images Based On Light-Baseimage](#images-based-on-light-baseimage)
   - [Image Assets](#image-assets)
     - [Tools](#tools)
     - [Services available](#services-available)
   - [Advanced User Guide](#advanced-user-guide)
     - [Service available](#service-available)
     - [Fix docker mounted file problems](#fix-docker-mounted-file-problems)
-    - [Distribution packages documentation and locales](#distribution-packages-documentation-and-locales)
     - [Mastering image tools](#mastering-image-tools)
       - [run](#run)
         - [Run command line options](#run-command-line-options)
@@ -65,7 +127,6 @@ Table of Contents
           - [No process image](#no-process-image)
         - [Extra environment variables](#extra-environment-variables)
       - [log-helper](#log-helper)
-      - [complex-bash-env](#complex-bash-env)
     - [Tests](#tests)
   - [Changelog](#changelog)
 
@@ -73,9 +134,9 @@ Table of Contents
 
 If you find this image useful here's how you can help:
 
-- Send a pull request with your kickass new features and bug fixes
-- Help new users with [issues](https://github.com/osixia/docker-openldap/issues) they may encounter
-- Support the development of this image and star this repo!
+- Send a pull request with new features and bug fixes.
+- Help new users with [issues](https://github.com/osixia/docker-light-baseimage/issues) they may encounter.
+- Support the development of this image and star this repo or/and the image on the docker hub.
 
 ## Overview
 
@@ -83,10 +144,9 @@ This image takes all the advantages of [phusion/baseimage-docker](https://github
 
 So major features are:
  - Greats building tools to minimize the image number of layers and optimize image build.
+ - A nice init process as image entrypoint that add helpfull extensions and options to fastly run and debug containers.
  - Simple way to install services and multiple process image stacks (runit, cron, syslog-ng-core and logrotate) if needed.
- - Getting environment variables from **.yaml** and **.json** files.
- - Special environment files **.startup.yaml** and **.startup.json** deleted after image startup files first execution to keep the image setup secret.
-
+ - Define container default and/or runtime environment variables in **.env** files.
 
 ## Quick Start
 
@@ -96,17 +156,17 @@ This image use four directories:
 
 - **/container/environment**: for environment files.
 - **/container/service**: for services to install, setup and run.
-- **/container/service-available**: for service that may be on demand downloaded, installed, setup and run.
+- **/container/services-available**: for service that may be on demand downloaded, installed, setup and run.
 - **/container/tool**: for image tools.
 
 By the way at run time another directory is created:
-- **/container/run**: To store container run environment, state, startup files and process to run based on files in  /container/environment and /container/service directories.
+- **/container/run**: To store container state, startup, process and finish files to run based on files in /container/environment  directory.
 
 But this will be dealt with in the following section.
 
 ### Service directory structure
 
-This section define a service directory that can be added in /container/service or /container/service-available.
+This section define a service directory that can be added in /container/service or /container/services-available.
 
 - **my-service**: root directory
 - **my-service/install.sh**: install script (not mandatory).
@@ -153,7 +213,7 @@ In the Dockerfile we are going to:
 
         # Use osixia/light-baseimage
         # https://github.com/osixia/docker-light-baseimage
-        FROM osixia/light-baseimage:1.3.3
+        FROM osixia/light-baseimage:2.0.0
 
         # Download nginx from apt-get and clean apt-get files
         RUN apt-get -y update \
@@ -165,21 +225,18 @@ In the Dockerfile we are going to:
         # Add service directory to /container/service
         ADD service /container/service
 
-        # Use baseimage install-service script
-        # https://github.com/osixia/docker-light-baseimage/blob/stable/image/tool/install-service
-        RUN /container/tool/install-service
+        # Use baseimage install-services script
+        # https://github.com/osixia/docker-light-baseimage/blob/main/image/tools/install-services
+        RUN /container/tools/install-services
 
         # Add default env directory
-        ADD environment /container/environment/99-default
-
-        # Set /var/www/ in a data volume
-        VOLUME /var/www/
+        ADD environment /container/environment/00-default
 
         # Expose default http and https ports
         EXPOSE 80 443
 
 
-The Dockerfile contains directives to download nginx from apt-get but all the initial setup will take place in install.sh file (called by /container/tool/install-service tool) for a better build experience. The time consuming download task is decoupled from the initial setup to make great use of docker build cache. If install.sh file is changed the builder won't have to download again nginx, and will just run install scripts.
+The Dockerfile contains directives to download nginx from apt-get but all the initial setup will take place in install.sh file (called by /container/tools/install-services tool) for a better build experience. The time consuming download task is decoupled from the initial setup to make great use of docker build cache. If install.sh file is changed the builder won't have to download again nginx, and will just run install scripts.
 
 #### Service files
 
@@ -239,16 +296,15 @@ We could already build and test this image but two more minutes to take advantag
 
 #### Environment files
 
-Let's create two files:
- - single-process-image/environment/default.yaml
- - single-process-image/environment/default.startup.yaml
+Let's create one .env file:
+ - single-process-image/environment/.env
 
 File name *default*.yaml and *default*.startup.yaml can be changed as you want. Also in this example we are going to use yaml files but json files works too.
 
-##### default.yaml
-default.yaml file define variables that can be used at any time in the container environment:
+##### .env
+.env file define variables that can be used at any time in the container environment:
 
-    WHO_AM_I: We are Anonymous. We are Legion. We do not forgive. We do not forget. Expect us.
+    WHO_AM_I=We are Anonymous. We are Legion. We do not forgive. We do not forget. Expect us.
 
 ##### default.startup.yaml
 default.startup.yaml define variables that are only available during the container **first start** in **startup files**.
@@ -300,7 +356,7 @@ Inspect the output and you should see that the secret is present in startup scri
 > The secret is: The database password is Baw0unga!
 
 And the secret is not defined in the process:
-> \*\*\* Remove file /container/environment/99-default/default.startup.yaml [...]
+> \*\*\* Remove file /container/environment/00-default/default.startup.yaml [...]
 
 > \*\*\* Running /container/run/process/nginx/run...
 
@@ -395,12 +451,12 @@ In the Dockerfile we are going to:
 
         # Use osixia/light-baseimage
         # https://github.com/osixia/docker-light-baseimage
-        FROM osixia/light-baseimage:1.3.3
+        FROM osixia/light-baseimage:2.0.0
 
         # Install multiple process stack, nginx and php7.4-fpm and clean apt-get files
-        # https://github.com/osixia/docker-light-baseimage/blob/stable/image/tool/add-multiple-process-stack
+        # https://github.com/osixia/docker-light-baseimage/blob/main/image/tools/add-multiple-process-stack
         RUN apt-get -y update \
-            && /container/tool/add-multiple-process-stack \
+            && /container/tools/add-multiple-process-stack \
             && LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
                 nginx \
                 php7.4-fpm \
@@ -410,21 +466,18 @@ In the Dockerfile we are going to:
         # Add service directory to /container/service
         ADD service /container/service
 
-        # Use baseimage install-service script
-        # https://github.com/osixia/docker-light-baseimage/blob/stable/image/tool/install-service
-        RUN /container/tool/install-service
+        # Use baseimage install-services script
+        # https://github.com/osixia/docker-light-baseimage/blob/main/image/tools/install-services
+        RUN /container/tools/install-services
 
         # Add default env directory
-        ADD environment /container/environment/99-default
-
-        # Set /var/www/ in a data volume
-        VOLUME /var/www/
+        ADD environment /container/environment/00-default
 
         # Expose default http and https ports
         EXPOSE 80 443
 
 
-The Dockerfile contains directives to download nginx and php7.4-fpm from apt-get but all the initial setup will take place in install.sh file (called by /container/tool/install-service tool) for a better build experience. The time consuming download task is decoupled from the initial setup to make great use of docker build cache. If an install.sh file is changed the builder will not have to download again nginx and php7.4-fpm add will just run install scripts.
+The Dockerfile contains directives to download nginx and php7.4-fpm from apt-get but all the initial setup will take place in install.sh file (called by /container/tools/install-services tool) for a better build experience. The time consuming download task is decoupled from the initial setup to make great use of docker build cache. If an install.sh file is changed the builder will not have to download again nginx and php7.4-fpm add will just run install scripts.
 
 Maybe you already read that in the previous example ?Sorry.
 
@@ -527,33 +580,9 @@ So we have a container with two process supervised by runit running in our conta
 This image provide several command line options to run commands at diferent time of container lifecycle.
 But the simplest way to run an extra command is :
 
-    docker run osixia/light-baseimage:1.3.3 -- /bin/sh -c "echo Hi!"
+    docker run osixia/light-baseimage:2.0.0 -- /bin/sh -c "echo Hi!"
 
 Please refer to [Run command line options](#run-command-line-options) for more information.
-
-## Images Based On Light-Baseimage
-
-Single process images:
-- [osixia/openldap](https://github.com/osixia/docker-openldap)
-- [osixia/keepalived](https://github.com/osixia/docker-keepalived)
-- [osixia/tinc](https://github.com/osixia/docker-tinc)
-- [osixia/cfssl-multirootca](https://github.com/osixia/docker-cfssl-multirootca)
-- [osixia/backup](https://github.com/osixia/docker-backup)
-- [osixia/backup-manager](https://github.com/osixia/docker-backup-manager)
-
-Multiple process images:
-- [osixia/openldap-backup](https://github.com/osixia/docker-openldap-backup)
-- [osixia/mariadb](https://github.com/osixia/docker-mariadb)
-- [osixia/wordpress](https://github.com/osixia/docker-wordpress)
-- [osixia/roundcube](https://github.com/osixia/docker-roundcube)
-- [osixia/piwik](https://github.com/osixia/docker-piwik)
-- [osixia/phpMyAdmin](https://github.com/osixia/docker-phpMyAdmin)
-- [osixia/phpLDAPadmin](https://github.com/osixia/docker-phpLDAPadmin)
-- [osixia/keepalived-confd](https://github.com/osixia/docker-keepalived-confd)
-- [osixia/tinc-etcd](https://github.com/osixia/docker-tinc-etcd)
-- [osixia/postfix-gateway-confd](https://github.com/osixia/docker-postfix-gateway-confd)
-
-Send me a message to add your image in this list.
 
 ## Image Assets
 
@@ -569,7 +598,7 @@ All container tools are available in `/container/tool` directory and are linked 
 | log-helper | A simple bash tool to print message base on the log level. |
 |  add-service-available | A tool to download and add services in service-available directory to the regular service directory. |
 | add-multiple-process-stack | A tool to add the multiple process stack: runit, cron syslog-ng-core and logrotate. |
-| install-service | A tool that execute /container/service/install.sh and /container/service/\*/install.sh scripts. |
+| install-services | A tool that execute /container/service/install.sh and /container/service/\*/install.sh scripts. |
 |  complex-bash-env | A tool to iterate trough complex bash environment variables created by the run tool when a table or a list was set in environment files or in environment command line argument. |
 
 ### Services available
@@ -597,23 +626,23 @@ Here simple Dockerfile example how to add a service-available to an image:
 
         # Use osixia/light-baseimage
         # https://github.com/osixia/docker-light-baseimage
-        FROM osixia/light-baseimage:1.3.3
+        FROM osixia/light-baseimage:2.0.0
 
         # Add cfssl and cron service-available
-        # https://github.com/osixia/docker-light-baseimage/blob/stable/image/tool/add-service-available
-        # https://github.com/osixia/docker-light-baseimage/blob/stable/image/service-available/:ssl-tools/download.sh
-        # https://github.com/osixia/docker-light-baseimage/blob/stable/image/service-available/:cron/download.sh
+        # https://github.com/osixia/docker-light-baseimage/blob/main/image/tools/add-service-available
+        # https://github.com/osixia/docker-light-baseimage/blob/main/image/service-available/:ssl-tools/download.sh
+        # https://github.com/osixia/docker-light-baseimage/blob/main/image/service-available/:cron/download.sh
         RUN apt-get -y update \
-            && /container/tool/add-service-available :ssl-tools :cron \
+            && /container/tools/add-service-available :ssl-tools :cron \
             && LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
                nginx \
                php7.4-fpm
         ...
 
 
-Note: Most of predefined service available start with a `:` to make sure they are installed before regular services (so they can be used by regular services). The install-service tool process services in /container/service in alphabetical order.
+Note: Most of predefined service available start with a `:` to make sure they are installed before regular services (so they can be used by regular services). The install-services tool process services in /container/service in alphabetical order.
 
-To create a service-available just create a regular service, add a download.sh file to set how the needed content is downloaded and add it to /container/service-available directory. The download.sh script is not mandatory if nothing need to be downloaded.
+To create a service-available just create a regular service, add a download.sh file to set how the needed content is downloaded and add it to /container/services-available directory. The download.sh script is not mandatory if nothing need to be downloaded.
 
 For example a simple image example that add service-available to this baseimage: [osixia/web-baseimage](https://github.com/osixia/docker-web-baseimage)
 
@@ -643,12 +672,6 @@ So to always apply sed on the correct file in the startup script the command bec
     sed -i "s|listen 80|listen 8080|g" ${CONTAINER_SERVICE_DIR}/php/config/default
 
 
-### Distribution packages documentation and locales
-
-This image has a configuration to prevent documentation and locales to be installed from base distribution packages repositories to make it more lightweight as possible. If you need the doc and locales remove the following files :
-**/etc/dpkg/dpkg.cfg.d/01_nodoc** and **/etc/dpkg/dpkg.cfg.d/01_nolocales**
-
-
 ### Mastering image tools
 
 #### run
@@ -666,7 +689,7 @@ What it does:
 
 *Run tool* takes several options, to list them:
 
-    docker run osixia/light-baseimage:1.3.3 --help
+    docker run osixia/light-baseimage:2.0.0 --help
     usage: run [-h] [-e] [-s] [-p] [-f] [-o {startup,process,finish}]
            [--pre-startup-cmd COMMAND] [--pre-process-cmd COMMAND]
            [--pre-finish-cmd COMMAND] [--pre-exit-cmd COMMAND] [-k]
@@ -783,7 +806,7 @@ If a main command is set for example:
 If a main command is set *run tool* launch it otherwise bash is launched.
 Example:
 
-    docker run -it osixia/light-baseimage:1.3.3
+    docker run -it osixia/light-baseimage:2.0.0
 
 
 ##### Extra environment variables
@@ -817,50 +840,12 @@ Log message functions usage: `log-helper error|warning|info|debug|trace message`
 
 You can also test the log level with the level function:
 
-    log-helper level eq info && echo "log level is infos"
+    log-helper level eq info && echo "log level is info"
 
-for example this will echo "log level is trace" if log level is trace.
+for example this will echo "log level is info" if log level is info.
 
 Level `function usage: log-helper level eq|ne|gt|ge|lt|le none|error|warning|info|debug|trace`
 Help: [http://www.tldp.org/LDP/abs/html/comparison-ops.html](http://www.tldp.org/LDP/abs/html/comparison-ops.html)
-
-#### complex-bash-env
-With light-baseimage you can set bash environment variable from .yaml and .json files.
-But bash environment variables can't store complex objects such as table that can be defined in yaml or json files, that's why they are converted to "complex bash environment variables" and complex-bash-env tool help getting those variables values easily.
-
-For example the following yaml file:
-
-      FRUITS:
-        - orange
-        - apple
-
-will produce this bash environment variables:
-
-      FRUITS=#COMPLEX_BASH_ENV:TABLE: FRUITS_ROW_1 FRUITS_ROW_2
-      FRUITS_ROW_1=orange
-      FRUITS_ROW_2=apple
-
-(this is done by run tool)
-
-complex-bash-env make it easy to iterate trough this variable:
-
-      for fruit in $(complex-bash-env iterate FRUITS)
-      do
-        echo ${!fruit}
-      done
-
-A more complete example can be found [osixia/phpLDAPadmin](https://github.com/osixia/docker-phpLDAPadmin) image.
-
-Note this yaml definition:
-
-    FRUITS:
-      - orange
-      - apple
-
-Can also be set by command line converted in python or json:
-
-    docker run -it --env FRUITS="#PYTHON2BASH:['orange','apple']" osixia/light-baseimage:1.3.3 printenv
-    docker run -it --env FRUITS="#JSON2BASH:[\"orange\",\"apple\"]" osixia/light-baseimage:1.3.3 printenv
 
 ### Tests
 

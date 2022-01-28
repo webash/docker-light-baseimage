@@ -1,0 +1,20 @@
+ARG BASEIMAGE_NAME
+ARG BASEIMAGE_TAG
+
+FROM ${BASEIMAGE_NAME}:${BASEIMAGE_TAG}
+
+COPY . /container
+RUN /container/build/install.sh
+
+ARG IMAGE_NAME
+ARG IMAGE_TAG
+
+ENV LANG="en_US.UTF-8" \
+    LANGUAGE="en_US:en" \
+    LC_ALL="en_US.UTF-8" \
+    LC_CTYPE="en_US.UTF-8" \
+    INITRD="no" \
+    CONTAINER_IMAGE_NAME=${IMAGE_NAME} \
+    CONTAINER_IMAGE_TAG=${IMAGE_TAG}
+
+ENTRYPOINT ["/container/tools/run"]
