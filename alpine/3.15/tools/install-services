@@ -37,7 +37,7 @@ def link(script, dest):
         return
 
     if not os.access(script, os.X_OK):
-        print("Error : file " + script + " needs executable permission")
+        print("Error: file " + script + " needs executable permission")
         exit(1)
 
     if os.path.islink(dest) and os.readlink(dest) == script:
@@ -48,7 +48,7 @@ def link(script, dest):
         os.symlink(script, dest)
         print("Link " + script + " to " + dest)
     except OSError as e:
-        print("Error : failed to link " + script + " to " + dest + " : " + str(e))
+        print("Error: failed to link " + script + " to " + dest + ": " + str(e))
         print_write_error_helper_and_exit()
 
 
@@ -56,6 +56,7 @@ def print_write_error_helper_and_exit():
     print("If this error is displayed during container run this may be because the container filesystem is read only. Consider adding \"RUN /container/tools/install-services\" in the Dockerfile. Dynamically adding new service in readonly container is not supported.")
     print("If this error is displayed during image build, follow recommendations to fix the build process.")
     exit(1)
+
 
 print("Running install-services...")
 
@@ -101,11 +102,12 @@ for run_dir in (RUN_STARTUP_DIR, RUN_PROCESS_DIR, RUN_FINISH_DIR):
                         os.remove(file)
 
                     except OSError as e:
-                        print("Error : failed to remove " + file + " : " + str(e))
+                        print("Error: failed to remove " + file + ": " + str(e))
                         print_write_error_helper_and_exit()
 
                 if not os.access(file, os.X_OK):
-                    print("Error : file " + file + " needs executable permission")
+                    print("Error: file " + file +
+                          " needs executable permission")
                     exit(1)
 
 nb_process = len(os.listdir(RUN_PROCESS_DIR))
@@ -116,6 +118,7 @@ if nb_process > 1:
     if not os.path.exists("/container/multiple_process_stack_added"):
         print("This image has multiple process.")
         subprocess.run("apt update", shell=True)
-        subprocess.run("/container/tools/add-multiple-process-stack", shell=True)
+        subprocess.run(
+            "/container/tools/add-multiple-process-stack", shell=True)
         print("For better image build process consider adding:")
         print("\"RUN apt update && /container/tools/add-multiple-process-stack\" in the Dockerfile.")

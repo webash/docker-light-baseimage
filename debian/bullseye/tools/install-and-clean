@@ -15,7 +15,7 @@ if [[ $ARGS =~ $RECOMMENDS ]]; then
     ARGS=${ARGS//${RECOMMENDS}/}
 fi
 
-echo "Install and clean : ${ARGS}"
+echo "Install and clean: ${ARGS}"
 
 apt install -y ${NO_RECOMMENDS} ${ARGS} \
     && apt-get -qy autoremove \

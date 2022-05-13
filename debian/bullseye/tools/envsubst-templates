@@ -20,15 +20,15 @@ if [ ! -d "${DIR}" ]; then
 	exit 1
 fi
 
-log-helper info "Going to use template directory ${DIR}"
+log-helper debug "Going to use template directory ${DIR}"
 
 if [ -z "${OUTPUT_DIR}" ]; then 
-	log-helper info "Template output directory is not set, output will set in template directory ${DIR}"
+	log-helper debug "Template output directory is not set, output will set in template directory ${DIR}"
 	OUTPUT_DIR=${DIR}
 fi
 
 if [ -z "${FILE_SUFFIX}" ]; then
-	log-helper info "Template suffix is not set, going to use ${DEFAULT_FILE_SUFFIX}"
+	log-helper debug "Template suffix is not set, going to use ${DEFAULT_FILE_SUFFIX}"
 	FILE_SUFFIX=${DEFAULT_FILE_SUFFIX}
 fi
 
@@ -43,7 +43,7 @@ find "${DIR}" -follow -type f -name "*${FILE_SUFFIX}" -print | while read -r TEM
 	OUTPUT_PATH="$OUTPUT_DIR/${RELATIVE_PATH%$FILE_SUFFIX}"
 	SUBDIR=$(dirname "$RELATIVE_PATH")
 
-	log-helper info "Running envsubst on ${TEMPLATE} to ${OUTPUT_PATH}"
+	log-helper info "Running envsubst on ${TEMPLATE} output to ${OUTPUT_PATH}"
 	
 	if [ -e "${OUTPUT_PATH}" ]; then 
 		log-helper warning "Output file ${OUTPUT_PATH} already exits and is going to be replaced"

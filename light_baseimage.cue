@@ -1,4 +1,4 @@
-package light_basimage
+package light_baseimage
 
 import (
     "dagger.io/dagger"
