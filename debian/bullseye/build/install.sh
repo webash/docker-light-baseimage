@@ -6,7 +6,7 @@ ln -s /container/tools/* /sbin/
 
 ## Create image default directories
 mkdir -p /container/environment \
-         /container/service \
+         /container/services \
          /container/run /container/run/startup /container/run/process /container/run/finish \
          /container/run/var /container/run/var/state
 

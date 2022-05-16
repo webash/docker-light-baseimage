@@ -8,7 +8,7 @@ RUN apt-get -y update \
     nginx \
     php7.4-fpm 
 
-ADD service /container/service
+ADD service /container/services
 
 RUN /container/tools/install-services
 

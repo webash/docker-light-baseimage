@@ -11,7 +11,7 @@ sed -i -e "s/;listen.group = www-data/listen.group = www-data/g" /etc/php/7.4/fp
 mkdir -p /run/php
 
 # replace default website with php service default website
-cp -f /container/service/php/config/default /etc/nginx/sites-available/default
+cp -f /container/services/php/config/default /etc/nginx/sites-available/default
 
 # create phpinfo.php
 echo "<?php phpinfo(); " > /var/www/html/phpinfo.php

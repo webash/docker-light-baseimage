@@ -6,7 +6,7 @@ RUN apt-get -y update \
     && install-and-clean \
     nginx
 
-COPY service /container/service
+COPY service /container/services
 
 RUN /container/tools/install-services
 

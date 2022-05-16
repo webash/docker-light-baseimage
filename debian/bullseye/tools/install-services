@@ -5,25 +5,38 @@
 
 import os
 import os.path
+import stat
 import subprocess
 
-SERVICE_DIR = "/container/service"
+SERVICE_DIR = "/container/services"
 
 INSTALL_FILENAME = "install.sh"
 STARTUP_FILENAME = "startup.sh"
 PROCESS_FILENAME = "process.sh"
 FINISH_FILENAME = "finish.sh"
 
-# keep sync with values in run file
+# Keep sync with values in run file.
 RUN_DIR = "/container/run"
 RUN_STARTUP_DIR = RUN_DIR + "/startup"
 RUN_PROCESS_DIR = RUN_DIR + "/process"
 RUN_FINISH_DIR = RUN_DIR + "/finish"
 
 
+def chmod_x(script):
+    try:
+        st = os.stat(script)
+        os.chmod(script, st.st_mode | stat.S_IEXEC)
+    except Exception as e:
+        print("Error: chmod +x failed on %s" % script)
+        exit(1)
+
+
 def install(script):
     if not os.path.isfile(script):
         return
+
+    if not os.access(script, os.X_OK):
+        chmod_x(script)
 
     print("Running " + script + "...")
     subprocess.run(script, shell=True)
@@ -37,8 +50,7 @@ def link(script, dest):
         return
 
     if not os.access(script, os.X_OK):
-        print("Error: file " + script + " needs executable permission")
-        exit(1)
+        chmod_x(script)
 
     if os.path.islink(dest) and os.readlink(dest) == script:
         return
@@ -60,13 +72,13 @@ def print_write_error_helper_and_exit():
 
 print("Running install-services...")
 
-# Run /container/service/install.sh
+# Run /container/services/install.sh
 install(os.path.join(SERVICE_DIR, INSTALL_FILENAME))
 
-# Run install.sh scripts of /container/service/*
-# Link startup.sh scripts of /container/service/* to /container/run/startup/*
-# Link process.sh scripts of /container/service/* to /container/run/process/*/run
-# Link finish.sh scripts of /container/service/* to /container/run/finish/*
+# Run install.sh scripts of /container/services/*
+# Link startup.sh scripts of /container/services/* to /container/run/startup/*
+# Link process.sh scripts of /container/services/* to /container/run/process/*/run
+# Link finish.sh scripts of /container/services/* to /container/run/finish/*
 for service in sorted(os.listdir(SERVICE_DIR)):
     service_directory = os.path.join(SERVICE_DIR, service)
 
@@ -93,8 +105,8 @@ for run_dir in (RUN_STARTUP_DIR, RUN_PROCESS_DIR, RUN_FINISH_DIR):
 
                 if not os.path.exists(real_path):
                     try:
-                        # special case for process script that are in a subdirectory named after the service name in RUN_PROCESS_DIR
-                        # we remove the subdirectory
+                        # Special case for process script that are in a subdirectory named after the service name in RUN_PROCESS_DIR
+                        # we remove the subdirectory.
                         if(file.startswith(RUN_PROCESS_DIR)):
                             file = os.path.dirname(file)
 
@@ -113,7 +125,7 @@ for run_dir in (RUN_STARTUP_DIR, RUN_PROCESS_DIR, RUN_FINISH_DIR):
 nb_process = len(os.listdir(RUN_PROCESS_DIR))
 print(str(nb_process) + " process found.")
 
-# Multiple process image
+# Multiple process image.
 if nb_process > 1:
     if not os.path.exists("/container/multiple_process_stack_added"):
         print("This image has multiple process.")
@@ -122,3 +134,5 @@ if nb_process > 1:
             "/container/tools/add-multiple-process-stack", shell=True)
         print("For better image build process consider adding:")
         print("\"RUN apt update && /container/tools/add-multiple-process-stack\" in the Dockerfile.")
+
+        subprocess.run("/container/tools/install-services", shell=True)

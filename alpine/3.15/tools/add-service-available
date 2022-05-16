@@ -4,8 +4,8 @@ log-helper level eq trace && set -x
 # Usage:
 # add-service-available [service 1] [service 2] ...
 
-SERVICE_DIR="/container/service"
-SERVICE_AVAILABLE_DIR="/container/service-available"
+SERVICE_DIR="/container/services"
+SERVICE_AVAILABLE_DIR="/container/services-available"
 DOWNLOAD_FILENAME="download.sh"
 
 for i in "$@"

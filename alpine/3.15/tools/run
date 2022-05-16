@@ -253,6 +253,9 @@ def generate(option, service_name="my-service"):
 
         if option == "dockerfile":
             shutil.copy(os.path.join(TEMPLATES_DIR, "Dockerfile.tmpl"), tmpdir)
+        else:
+            shutil.copy(os.path.join(TEMPLATES_DIR,
+                        "my_image.cue.tmpl"), tmpdir)
 
         shutil.copytree(os.path.join(TEMPLATES_DIR, "environment"),
                         os.path.join(RUN_VAR_GENERATE_DIR, "environment"))
@@ -274,6 +277,9 @@ def generate_multiprocess(option):
         if option == "dockerfile":
             shutil.copy(os.path.join(TEMPLATES_DIR, "Dockerfile.multiprocess.tmpl"), os.path.join(
                 tmpdir, "Dockerfile.tmpl"))
+        else:
+            shutil.copy(os.path.join(TEMPLATES_DIR, "my_image.cue.multiprocess.tmpl"), os.path.join(
+                tmpdir, "my_image.cue.tmpl"))
 
         generate_envsubst_templates(tmpdir)
 
@@ -670,15 +676,15 @@ parser = argparse.ArgumentParser(prog='', description='Container image: ' + get_
 parser.add_argument('main_command', metavar='MAIN_COMMAND', type=str, nargs='*',
                     help='the main command to run, leave empty to only run container process. Otherwise this command is run before startup scripts')
 
-generators_group = parser.add_argument_group('template generators')
-generators_group.add_argument('--generate', type=str, choices=["dockerfile", "dagger.io"], dest='generate',
-                              help='generate base templates for single process image')
-generators_group.add_argument('--generate-multiprocess', type=str, choices=["dockerfile", "dagger.io"], dest='generate_multiprocess',
-                              help='generate base templates for multiprocess image')
-generators_group.add_argument('--generate-service', metavar='NAME', dest='generate_service', action='append',
-                              help='generate NAME service templates')
-generators_group.add_argument('--generate-service-available', metavar='NAME', dest='generate_service_available', action='append',
-                              help='generate NAME service available templates')
+generator_group = parser.add_argument_group('templates generator')
+generator_group.add_argument('--generate', type=str, choices=["dockerfile", "dagger.io"], dest='generate',
+                             help='generate base templates for single process image')
+generator_group.add_argument('--generate-multiprocess', type=str, choices=["dockerfile", "dagger.io"], dest='generate_multiprocess',
+                             help='generate base templates for multiprocess image')
+generator_group.add_argument('--generate-service', metavar='NAME', dest='generate_service', action='append',
+                             help='generate NAME service templates')
+generator_group.add_argument('--generate-service-available', metavar='NAME', dest='generate_service_available', action='append',
+                             help='generate NAME service available templates')
 
 environment_group = parser.add_argument_group('environment variables')
 environment_group.add_argument('-e', '--skip-env-files', dest='skip_env_files',
@@ -748,7 +754,7 @@ log_level_switcher_inv = {LOG_LEVEL_NONE: "none", LOG_LEVEL_ERROR: "error", LOG_
 log_level = log_level_switcher.get(args.log_level)
 log_json = args.log_json
 
-# Generators options.
+# Generator options.
 # Must be called before set_dir_env and set_log_env,
 # so container environment variables are not replaced by envsubst-templates
 generator(args)
@@ -776,13 +782,6 @@ if args.run_only is not None:
     elif args.run_only == "finish":
         args.skip_startup = True
         args.skip_process = True
-
-# For single and multiple process image with main command,
-# we run the main command as the last pre-process command.
-if len(args.main_command) != 0 and (is_single_process_container() or is_multiple_process_container()):
-    args.pre_startup_cmds.append(
-        [' '.join(shlex.quote(x) for x in args.main_command)])
-    args.main_command = []
 
 # Run main function.
 signal.signal(signal.SIGTERM, lambda signum,
