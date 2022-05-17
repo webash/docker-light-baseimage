@@ -24,6 +24,8 @@ KILL_PROCESS_TIMEOUT = int(os.environ.get(
 KILL_ALL_PROCESSES_TIMEOUT = int(os.environ.get(
     'CONTAINER_KILL_ALL_PROCESSES_TIMEOUT', 30))
 
+terminated_child_processes = {}
+
 LOG_LEVEL_NONE = 0
 LOG_LEVEL_ERROR = 1
 LOG_LEVEL_WARNING = 2
@@ -31,9 +33,14 @@ LOG_LEVEL_INFO = 3
 LOG_LEVEL_DEBUG = 4
 LOG_LEVEL_TRACE = 5
 
-log_level = None
+log_level_switcher = {"none": LOG_LEVEL_NONE, "error": LOG_LEVEL_ERROR, "warning": LOG_LEVEL_WARNING,
+                      "info": LOG_LEVEL_INFO, "debug": LOG_LEVEL_DEBUG, "trace": LOG_LEVEL_TRACE}
+
+log_level_switcher_inv = {v: k for k, v in log_level_switcher.items()}
+
+# Keep sync with log-helper default values
+log_level = LOG_LEVEL_INFO
 log_json = False
-terminated_child_processes = {}
 
 ENVIRONMENT_FILES_IMPORT_DIR = "/container/environment"
 ENVIRONMENT_FILES_PREFIX = ('.env')
@@ -673,8 +680,12 @@ def main(args):
 # Command line options.
 parser = argparse.ArgumentParser(prog='', description='Container image: ' + get_container_image(
 ), epilog='Built with osixia/light-baseimage (https://github.com/osixia/docker-light-baseimage) 🐳✨🌴')
+
 parser.add_argument('main_command', metavar='MAIN_COMMAND', type=str, nargs='*',
                     help='the main command to run, leave empty to only run container process. Otherwise this command is run before startup scripts')
+parser.add_argument('-v', '--version', dest='version',
+                    action='store_true',
+                    help='print container image version')
 
 generator_group = parser.add_argument_group('templates generator')
 generator_group.add_argument('--generate', type=str, choices=["dockerfile", "dagger.io"], dest='generate',
@@ -726,16 +737,13 @@ debug_group.add_argument('-k', '--no-kill-all-on-exit', dest='kill_all_on_exit',
 debug_group.add_argument('-a', '--keepalive', dest='keepalive',
                          action='store_true',
                          help='keep alive container after all process have exited')
-debug_group.add_argument('-v', '--version', dest='version',
-                         action='store_true',
-                         help='print container image version')
 
 logs_group = parser.add_argument_group('logging')
 logs_group.add_argument('-j', '--logjson', dest='log_json',
                         action='store_true',
                         help='set log format to JSON.')
-logs_group.add_argument('-l', '--loglevel', type=str, choices=["none", "error", "warning", "info", "debug", "trace"], dest='log_level', default="info",
-                        help='set log level, default: info')
+logs_group.add_argument('-l', '--loglevel', type=str, choices=log_level_switcher.keys(), dest='log_level', default=log_level_switcher_inv.get(log_level),
+                        help='set log level, default: %s' % log_level_switcher_inv.get(log_level))
 
 args = parser.parse_args()
 
@@ -745,12 +753,6 @@ if args.version:
     sys.exit(0)
 
 # Set logs level and output type.
-log_level_switcher = {"none": LOG_LEVEL_NONE, "error": LOG_LEVEL_ERROR, "warning": LOG_LEVEL_WARNING,
-                      "info": LOG_LEVEL_INFO, "debug": LOG_LEVEL_DEBUG, "trace": LOG_LEVEL_TRACE}
-
-log_level_switcher_inv = {LOG_LEVEL_NONE: "none", LOG_LEVEL_ERROR: "error", LOG_LEVEL_WARNING: "warning",
-                          LOG_LEVEL_INFO: "info", LOG_LEVEL_DEBUG: "debug", LOG_LEVEL_TRACE: "trace"}
-
 log_level = log_level_switcher.get(args.log_level)
 log_json = args.log_json
 

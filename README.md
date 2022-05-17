@@ -8,7 +8,7 @@
 [![GitHub Stars](https://img.shields.io/github/stars/osixia/docker-light-baseimage?label=github%20stars&style=flat-square)][github]
 [![Contributors](https://img.shields.io/github/contributors/osixia/docker-light-baseimage?style=flat-square)](https://github.com/osixia/docker-light-baseimage/graphs/contributors)
 
-Debian 11 (Bullseye) and Alpine 3.15 based docker images to build reliable images quickly. 
+Debian 11 (Bullseye) and Alpine 3.15 docker base images to build reliable images quickly. 
 
 **This image provide a simple opinionated solution to build single or multiple process images with minimum of layers and an optimized build.**
 
@@ -30,7 +30,7 @@ docker run --rm osixia/light-baseimage:2.0.0 --generate dockerfile
 # Alpine
 docker run --rm osixia/light-baseimage:2.0.0-alpine --generate dockerfile
 ```
-Replace `dockerfile` by `dagger.io` to get a minimal [dagger.io](https://dagger.io) example.
+Replace `--generate` with `--generate-multiprocess` to get a minimal multiprocess templates and replace `dockerfile` with `dagger.io` to get a [dagger.io](https://dagger.io) example.
 
 ## 📄 Documentation
 

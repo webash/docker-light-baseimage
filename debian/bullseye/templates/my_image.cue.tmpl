@@ -2,7 +2,9 @@ package my_image
 
 import (
     "dagger.io/dagger"
+    "dagger.io/dagger/core"
     "universe.dagger.io/docker"
+    "universe.dagger.io/docker/cli"
 )
 
 // This action builds a docker image from ${CONTAINER_IMAGE_NAME}:${CONTAINER_IMAGE_TAG}.
@@ -12,8 +14,8 @@ import (
     // Image name
     name?: string
 
-    // Image version
-    version?: string
+    // Image tag
+    tag?: string
 
     // Environement directory
     environment: dagger.#FS
@@ -30,28 +32,26 @@ import (
             docker.#Pull & {
                 source: "${CONTAINER_IMAGE_NAME}:${CONTAINER_IMAGE_TAG}"
             },
-            if name && version {
-                docker.#Set & {
-                    config: core.#ImageConfig & {
-                        env: {
-                            CONTAINER_IMAGE_NAME: name
-                            CONTAINER_IMAGE_TAG: version
-                        }
+            docker.#Set & {
+                config: core.#ImageConfig & {
+                    env: {
+                        CONTAINER_IMAGE_NAME?: name
+                        CONTAINER_IMAGE_TAG?: tag
                     }
-                },
-            }
+                }
+            },
             docker.#Run & {
                 entrypoint: ["/bin/bash", "-c", "apt -y update && install-and-clean && [....]"]
             },
             docker.#Copy & {
-                contents: servicesDirectory
+                contents: services
                 dest:     "/container/services"
             },
             docker.#Run & {
                 entrypoint: ["/container/tools/install-services"]
             },
             docker.#Copy & {
-                contents: environmentDirectory
+                contents: environment
                 dest:     "/container/environment/${ENVIRONMENT_DIRECTORY}"
             },
         ]
@@ -65,17 +65,31 @@ dagger.#Plan & {
             "./environment": read: contents: dagger.#FS
             "./services": read: contents: dagger.#FS
         }
+        network: "unix:///var/run/docker.sock": connect: dagger.#Socket
         env: {
-            IMAGE_NAME?: string
-            IMAGE_VERSION?: string
+            IMAGE_NAME: string | *"example/my-image"
+            IMAGE_TAG: string | *"develop"
         }
     }
 
-    actions: build: #Build & {
-        name: client.env.IMAGE_NAME
-        version: client.env.IMAGE_VERSION
+    _imageId: client.env.IMAGE_NAME + ":" + client.env.IMAGE_TAG
 
-        environment: client.filesystem."./environment".read.contents
-        services: client.filesystem."./services".read.contents
+    actions: {
+        build: #Build & {
+            name: client.env.IMAGE_NAME
+            tag: client.env.IMAGE_TAG
+
+            environment: client.filesystem."./environment".read.contents
+            services: client.filesystem."./services".read.contents
+        }
+        load: cli.#Load & {
+            "image": build.image
+            "host":  client.network."unix:///var/run/docker.sock".connect
+            "tag":   _imageId
+        }
+        push: docker.#Push & {
+            image: build.image
+            dest:  _imageId
+        }
     }
 }
