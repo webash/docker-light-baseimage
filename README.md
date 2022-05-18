@@ -34,7 +34,8 @@ Replace `--generate` with `--generate-multiprocess` to get a minimal multi proce
 
 ```
 docker run --rm --volume $(pwd)/example:/container/run/var/generate osixia/light-baseimage:2.0.0 --generate dockerfile
-
+```
+```
 tree -a example
 ```
 
@@ -53,6 +54,8 @@ example
 
 ```
 cd example
+```
+```
 cat Dockerfile
 ```
 
@@ -80,6 +83,8 @@ COPY environment /container/environment/00-default
 
 ```
 docker build -t example/my-image:develop .
+```
+```
 docker run --rm example/my-image:develop
 ```
 
