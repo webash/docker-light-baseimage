@@ -1,4 +1,4 @@
 #!/bin/bash -e
 
-# download syslog-ng-core from apt-get
-LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends syslog-ng-core
+# download syslog-ng-core
+/container/tools/packages-install syslog-ng-core

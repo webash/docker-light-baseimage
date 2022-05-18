@@ -125,14 +125,14 @@ for run_dir in (RUN_STARTUP_DIR, RUN_PROCESS_DIR, RUN_FINISH_DIR):
 nb_process = len(os.listdir(RUN_PROCESS_DIR))
 print(str(nb_process) + " process found.")
 
-# Multiple process image.
+# Multiprocess image.
 if nb_process > 1:
-    if not os.path.exists("/container/multiple_process_stack_added"):
-        print("This image has multiple process.")
-        subprocess.run("apt update", shell=True)
+    if not os.path.exists("/container/multiprocess_stack_added"):
+        print("This image has multiple processes.")
+        subprocess.run("/container/tools/packages-index-update", shell=True)
         subprocess.run(
-            "/container/tools/add-multiple-process-stack", shell=True)
-        print("For better image build process consider adding:")
-        print("\"RUN apt update && /container/tools/add-multiple-process-stack\" in the Dockerfile.")
-
+            "/container/tools/add-multiprocess-stack", shell=True)
+        subprocess.run("/container/tools/packages-index-clean", shell=True)
         subprocess.run("/container/tools/install-services", shell=True)
+        print("For better image build process consider adding:")
+        print("\"RUN packages-index-update && add-multiprocess-stack && packages-index-clean\" in the Dockerfile.")

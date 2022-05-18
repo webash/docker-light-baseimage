@@ -6,11 +6,12 @@ log-helper level eq trace && set -x
 
 TO_INSTALL=(curl less procps psmisc strace vim-tiny)
 
-echo "Install debug tools:" "${TO_INSTALL[@]}"
+log-helper info "Install debug tools:" "${TO_INSTALL[@]}"
 
 if [ -n "$@" ]; then 
-    echo "with extra package(s): $@"
+    log-helper info "with extra package(s): $@"
     TO_INSTALL+=("$@")
 fi
 
-/container/tools/install-and-clean "${TO_INSTALL[@]}"
+/container/tools/packages-index-update
+/container/tools/packages-install-clean "${TO_INSTALL[@]}"

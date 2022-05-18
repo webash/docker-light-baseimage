@@ -1,0 +1,8 @@
+#!/bin/bash -e
+log-helper level eq trace && set -x
+
+# Usage:
+# packages-install-clean [package 1] [package 2] ...
+
+/container/tools/packages-install "$@"
+/container/tools/packages-index-clean

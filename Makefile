@@ -14,7 +14,7 @@ copy-distribution-shared-files:
 	@cp -f $(MAIN_IMAGE_PATH)/Dockerfile $(ALPINE_315_PATH)/
 	@cp -f $(MAIN_IMAGE_PATH)/.dockerignore $(ALPINE_315_PATH)/
 	@cp -rf $(MAIN_IMAGE_PATH)/templates $(ALPINE_315_PATH)/
-	@find $(MAIN_IMAGE_PATH)/tools -type f ! -name install-and-clean -exec cp -t $(ALPINE_315_PATH)/tools {} +
+	@find $(MAIN_IMAGE_PATH)/tools -type f ! -name packages-* -exec cp -t $(ALPINE_315_PATH)/tools {} +
 
 .PHONY: dagger-init
 dagger-init:

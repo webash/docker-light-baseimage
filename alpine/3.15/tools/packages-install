@@ -2,7 +2,7 @@
 log-helper level eq trace && set -x
 
 # Usage:
-# install-and-clean [package 1] [package 2] ...
+# packages-install [package 1] [package 2] ...
 
 export LC_ALL=C
 export DEBIAN_FRONTEND=noninteractive
@@ -15,9 +15,5 @@ if [[ $ARGS =~ $RECOMMENDS ]]; then
     ARGS=${ARGS//${RECOMMENDS}/}
 fi
 
-echo "Install and clean: ${ARGS}"
-
-apt install -y ${NO_RECOMMENDS} ${ARGS} \
-    && apt-get -qy autoremove \
-    && apt-get clean \
-    && rm -r /var/lib/apt/lists/*
+log-helper info "Install packages: ${ARGS}"
+apt install -y ${NO_RECOMMENDS} ${ARGS}

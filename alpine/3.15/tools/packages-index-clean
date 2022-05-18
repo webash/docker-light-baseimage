@@ -1,0 +1,10 @@
+#!/bin/bash -e
+log-helper level eq trace && set -x
+
+# Usage:
+# packages-index-clean
+
+log-helper info "Clean packages index"
+apt -qy autoremove
+apt clean
+rm -r /var/lib/apt/lists/*

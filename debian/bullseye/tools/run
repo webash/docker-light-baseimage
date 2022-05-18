@@ -277,7 +277,7 @@ def generate_multiprocess(option):
     generate(option, "service-1")
     generate_service("service-2", "services")
 
-    debug("Generate multiple process templates")
+    debug("Generate multiprocess templates")
     with tempfile.TemporaryDirectory() as tmpdir:
         trace("Use temporary directory: %s" % tmpdir)
 
@@ -369,7 +369,7 @@ def get_container_image():
     return os.environ.get(ENVIRONMENT_IMAGE_NAME_KEY, '') + ':' + os.environ.get(ENVIRONMENT_IMAGE_TAG_KEY, '')
 
 
-def is_multiple_process_container():
+def is_multiprocess_container():
     return len(listdir(RUN_PROCESS_DIR)) > 1
 
 
@@ -588,9 +588,9 @@ def wait_for_runit_services():
             shutdown_runit_services()
 
 
-def run_multiple_process_container(args):
+def run_multiprocess_container(args):
     if not is_runit_installed():
-        error("Runit is not installed and this is a multiple process container.")
+        error("Runit is not installed and this is a multiprocess container.")
         return
 
     background_process_exited = False
@@ -671,8 +671,8 @@ def main(args):
 
         if is_single_process_container():
             run_single_process_container(args)
-        elif is_multiple_process_container():
-            run_multiple_process_container(args)
+        elif is_multiprocess_container():
+            run_multiprocess_container(args)
         else:
             run_no_process_container(args)
 
@@ -682,7 +682,7 @@ parser = argparse.ArgumentParser(prog='', description='Container image: ' + get_
 ), epilog='Built with osixia/light-baseimage (https://github.com/osixia/docker-light-baseimage) 🐳✨🌴')
 
 parser.add_argument('main_command', metavar='MAIN_COMMAND', type=str, nargs='*',
-                    help='the main command to run, leave empty to only run container process. Otherwise this command is run before startup scripts')
+                    help='the main command to run in addition of container processes (default value: /bin/bash if the container have no process, none otherwise)')
 parser.add_argument('-v', '--version', dest='version',
                     action='store_true',
                     help='print container image version')
@@ -728,15 +728,15 @@ commands_group.add_argument('--pre-exit-cmd', metavar='COMMAND', dest='pre_exit_
 ci_cd_group = parser.add_argument_group('ci/cd')
 ci_cd_group.add_argument('-w', '--unsecure-fast-write', dest='unsecure_fast_write',
                          action='store_true',
-                         help='disable fsync and friends with eatmydata LD_PRELOAD library. Can help to speed up CI/CD pipelines. Use with caution')
+                         help='disable fsync and friends with eatmydata LD_PRELOAD library')
 
 debug_group = parser.add_argument_group('debugging')
 debug_group.add_argument('-k', '--no-kill-all-on-exit', dest='kill_all_on_exit',
                          action='store_false',
                          help='don\'t kill all processes on the system upon exiting')
-debug_group.add_argument('-a', '--keepalive', dest='keepalive',
+debug_group.add_argument('-a', '--keep-alive', dest='keep_alive',
                          action='store_true',
-                         help='keep alive container after all process have exited')
+                         help='keep alive container after all processes have exited')
 
 logs_group = parser.add_argument_group('logging')
 logs_group.add_argument('-j', '--logjson', dest='log_json',
@@ -814,7 +814,7 @@ finally:
 
     run_cmds(args.pre_exit_cmds, 'exit')
 
-    if args.keepalive:
+    if args.keep_alive:
         try:
             info("All process have exited, keep container alive...")
             while True:

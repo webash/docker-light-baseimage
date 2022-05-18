@@ -10,13 +10,13 @@
 
 Debian 11 (Bullseye) and Alpine 3.15 docker base images to build reliable images quickly. 
 
-**This image provide a simple opinionated solution to build single or multiple process images with minimum of layers and an optimized build.**
+**This image provide a simple opinionated solution to build single or multiple processes images with minimum of layers and an optimized build.**
 
-It helps speeding up image build time and CI/CD pipelines by providing:
+It helps speeding up image development and CI/CD pipelines by providing:
 
  - Greats building tools to **minimize the image number of layers and make best use of image build cache**.
  - A nice init process as image entrypoint that add **helpfull extensions and options to fastly run and debug containers**.
- - Simple way to create **multiple process images** if needed.
+ - Simple way to create **multiprocess images** if needed.
 
 ## 🕐 Quick Start
 
@@ -30,7 +30,58 @@ docker run --rm osixia/light-baseimage:2.0.0 --generate dockerfile
 # Alpine
 docker run --rm osixia/light-baseimage:2.0.0-alpine --generate dockerfile
 ```
-Replace `--generate` with `--generate-multiprocess` to get a minimal multiprocess templates and replace `dockerfile` with `dagger.io` to get a [dagger.io](https://dagger.io) example.
+Replace `--generate` with `--generate-multiprocess` to get a minimal multi processes templates and replace `dockerfile` with `dagger.io` to get a [dagger.io](https://dagger.io) example.
+
+```
+docker run --rm --volume $(pwd)/example:/container/run/var/generate osixia/light-baseimage:2.0.0 --generate dockerfile
+
+tree -a example
+```
+
+```
+example
+├── Dockerfile
+├── environment
+│   └── .env
+└── services
+    └── my-service
+        ├── finish.sh
+        ├── install.sh
+        ├── process.sh
+        └── startup.sh
+```
+
+```
+cd example
+cat Dockerfile
+```
+
+```
+FROM osixia/light-baseimage:2.0.0
+
+# Uncomment to add container environment variables used by generator
+# and provide templates to extend your image
+# ARG IMAGE_NAME=my-compagny
+# ARG IMAGE_TAG=1.0.0
+# ENV CONTAINER_IMAGE_NAME=${IMAGE_NAME} \
+#     CONTAINER_IMAGE_TAG=${IMAGE_TAG}
+
+RUN packages-index-update \  <--- Remove this line
+    && packages-install-clean \  <--- Remove this line
+        [....]  <--- Remove this line
+
+COPY services /container/services
+
+RUN install-services
+
+COPY environment /container/environment/00-default
+
+```
+
+```
+docker build -t example/my-image:develop .
+docker run --rm example/my-image:develop
+```
 
 ## 📄 Documentation
 

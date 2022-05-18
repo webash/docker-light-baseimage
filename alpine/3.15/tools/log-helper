@@ -17,6 +17,7 @@ LOG_LEVEL_INFO=3
 LOG_LEVEL_DEBUG=4
 LOG_LEVEL_TRACE=5
 
+# Keep sync with run default values
 # default log level if CONTAINER_LOG_LEVEL is not set -> info
 log_level=${CONTAINER_LOG_LEVEL:-${LOG_LEVEL_INFO}}
 log_format=${CONTAINER_LOG_FORMAT:-"CONSOLE"}

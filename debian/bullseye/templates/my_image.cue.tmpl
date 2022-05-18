@@ -41,14 +41,14 @@ import (
                 }
             },
             docker.#Run & {
-                entrypoint: ["/bin/bash", "-c", "apt -y update && install-and-clean && [....]"]
+                entrypoint: ["/bin/bash", "-c", "packages-index-update && packages-install-clean && [....]"]
             },
             docker.#Copy & {
                 contents: services
                 dest:     "/container/services"
             },
             docker.#Run & {
-                entrypoint: ["/container/tools/install-services"]
+                entrypoint: ["install-services"]
             },
             docker.#Copy & {
                 contents: environment

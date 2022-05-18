@@ -1,0 +1,8 @@
+#!/bin/bash -e
+log-helper level eq trace && set -x
+
+# Usage:
+# packages-index-update
+
+log-helper info "Update packages index"
+apt -y update
