@@ -2,7 +2,7 @@
 log-helper level eq trace && set -x
 
 # Usage:
-# add-service-available [service 1] [service 2] ...
+# add-services-available [service 1] [service 2] ...
 
 SERVICE_DIR="/container/services"
 SERVICE_AVAILABLE_DIR="/container/services-available"
@@ -10,7 +10,7 @@ DOWNLOAD_FILENAME="download.sh"
 
 for i in "$@"
 do
-    echo "add-service-available: ${i}"
+    echo "add-services-available: ${i}"
     if  [ -d "${SERVICE_AVAILABLE_DIR}/${i}" ]; then
         
         if [ -f "${SERVICE_AVAILABLE_DIR}/${i}/${DOWNLOAD_FILENAME}" ]; then
@@ -25,7 +25,7 @@ do
         mv "${SERVICE_AVAILABLE_DIR}/${i}" "${SERVICE_DIR}/${i}"
         
     else
-        echo "service-available: ${i} not found in ${SERVICE_AVAILABLE_DIR}/${i}"
+        echo "${i} not found in ${SERVICE_AVAILABLE_DIR}/${i}"
         exit 1
     fi
 done

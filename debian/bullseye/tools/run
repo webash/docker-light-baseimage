@@ -19,10 +19,10 @@ from datetime import datetime
 from dotenv import load_dotenv
 
 KILL_PROCESS_TIMEOUT = int(os.environ.get(
-    'CONTAINER_KILL_PROCESS_TIMEOUT', 30))
+    "CONTAINER_KILL_PROCESS_TIMEOUT", 30))
 
 KILL_ALL_PROCESSES_TIMEOUT = int(os.environ.get(
-    'CONTAINER_KILL_ALL_PROCESSES_TIMEOUT', 30))
+    "CONTAINER_KILL_ALL_PROCESSES_TIMEOUT", 30))
 
 terminated_child_processes = {}
 
@@ -43,7 +43,7 @@ log_level = LOG_LEVEL_INFO
 log_json = False
 
 ENVIRONMENT_FILES_IMPORT_DIR = "/container/environment"
-ENVIRONMENT_FILES_PREFIX = ('.env')
+ENVIRONMENT_FILES_PREFIX = (".env")
 
 TEMPLATES_DIR = "/container/templates"
 
@@ -57,13 +57,13 @@ RUN_VAR_DIR = "/container/run/var"
 RUN_VAR_STATE_DIR = RUN_VAR_DIR + "/state"
 RUN_VAR_GENERATE_DIR = RUN_VAR_DIR + "/generate"
 
-ENVIRONMENT_LOG_LEVEL_KEY = 'CONTAINER_LOG_LEVEL'
-ENVIRONMENT_LOG_FORMAT_KEY = 'CONTAINER_LOG_FORMAT'
-ENVIRONMENT_VAR_DIR_KEY = 'CONTAINER_VAR_DIR'
-ENVIRONMENT_STATE_DIR_KEY = 'CONTAINER_STATE_DIR'
+ENVIRONMENT_LOG_LEVEL_KEY = "CONTAINER_LOG_LEVEL"
+ENVIRONMENT_LOG_FORMAT_KEY = "CONTAINER_LOG_FORMAT"
+ENVIRONMENT_VAR_DIR_KEY = "CONTAINER_VAR_DIR"
+ENVIRONMENT_STATE_DIR_KEY = "CONTAINER_STATE_DIR"
 
-ENVIRONMENT_IMAGE_NAME_KEY = 'CONTAINER_IMAGE_NAME'
-ENVIRONMENT_IMAGE_TAG_KEY = 'CONTAINER_IMAGE_TAG'
+ENVIRONMENT_IMAGE_NAME_KEY = "CONTAINER_IMAGE_NAME"
+ENVIRONMENT_IMAGE_TAG_KEY = "CONTAINER_IMAGE_TAG"
 
 
 class AlarmException(Exception):
@@ -75,12 +75,12 @@ def write_log(level, message):
 
     if log_json:
         dictionary = {"datetime": now,
-                      "level": level.strip(), "message": message}
-        sys.stderr.write(json.dumps(dictionary) + "\n")
+                      "level": level.strip(), "message": message.strip()}
+        sys.stderr.write("%s\n" % json.dumps(dictionary))
         return
 
     for line in message.splitlines():
-        sys.stderr.write("*** %s | %s | %s\n" % (now, level, line))
+        sys.stderr.write("*** %s | %s | %s\n" % (now, level, line.rstrip()))
 
 
 def error(message):
@@ -111,7 +111,7 @@ def trace(message):
 def debug_env():
     message = "Environment variables:\n"
     for name, value in list(os.environ.items()):
-        message += name + "=" + value + "\n"
+        message += "%s=%s\n" % (name, value)
     debug(message)
 
 
@@ -122,7 +122,7 @@ def ignore_signals_and_raise_keyboard_interrupt(signame):
 
 
 def raise_alarm_exception():
-    raise AlarmException('Alarm')
+    raise AlarmException("Alarm")
 
 
 def listdir(path):
@@ -145,7 +145,7 @@ def is_exe(path):
 
 def xstr(s):
     if s is None:
-        return ''
+        return ""
     return str(s)
 
 
@@ -235,7 +235,7 @@ def generate_envsubst_templates(source, dest=None, environ=None):
     subprocess_environ = os.environ.copy()
     subprocess_environ[ENVIRONMENT_LOG_LEVEL_KEY] = xstr(LOG_LEVEL_WARNING)
 
-    if not os.path.isdir(os.path.join(ENVIRONMENT_FILES_IMPORT_DIR, '00-default')):
+    if not os.path.isdir(os.path.join(ENVIRONMENT_FILES_IMPORT_DIR, "00-default")):
         subprocess_environ["ENVIRONMENT_DIRECTORY"] = "00-default"
     else:
         subprocess_environ["ENVIRONMENT_DIRECTORY"] = "xx-some-dir"
@@ -296,7 +296,7 @@ def generate_service(name, in_dir=None):
     with tempfile.TemporaryDirectory() as tmpdir:
         trace("Use temporary directory: %s" % tmpdir)
 
-        shutil.copytree(os.path.join(TEMPLATES_DIR, "service"),
+        shutil.copytree(os.path.join(TEMPLATES_DIR, "services", "service"),
                         os.path.join(tmpdir, name))
 
         generate_envsubst_templates(tmpdir, in_dir, {"SERVICE_NAME": name})
@@ -311,14 +311,14 @@ def generate_service_available(name, in_dir=None):
         trace("Use temporary directory: %s" % tmpdir)
 
         shutil.copytree(os.path.join(
-            TEMPLATES_DIR, "service-available"), os.path.join(tmpdir, name))
+            TEMPLATES_DIR, "services-available", "service-available"), os.path.join(tmpdir, name))
 
         generate_envsubst_templates(tmpdir, in_dir, {"SERVICE_NAME": name})
 
 
 def import_env_files():
     if not os.path.exists(ENVIRONMENT_FILES_IMPORT_DIR):
-        warning(ENVIRONMENT_FILES_IMPORT_DIR + " don't exists")
+        warning("%s directory don't exists" % ENVIRONMENT_FILES_IMPORT_DIR)
         return
 
     env_backup = dict(os.environ)
@@ -329,7 +329,7 @@ def import_env_files():
 
                 filepath = os.path.join(subdir, file)
 
-                info('Load environment file ' + filepath)
+                info("Loading environment file %s..." % filepath)
                 load_dotenv(filepath, override=True)
                 set_env(env_backup)
 
@@ -341,32 +341,41 @@ def set_env(env):
 
 
 def set_dir_env():
+    trace("Setting container directories environment variables...")
+
     os.environ[ENVIRONMENT_VAR_DIR_KEY] = RUN_VAR_DIR
-    trace(ENVIRONMENT_VAR_DIR_KEY + "=" + os.environ[ENVIRONMENT_VAR_DIR_KEY])
+    trace("%s=%s" % (ENVIRONMENT_VAR_DIR_KEY,
+          os.environ[ENVIRONMENT_VAR_DIR_KEY]))
 
     os.environ[ENVIRONMENT_STATE_DIR_KEY] = RUN_VAR_STATE_DIR
-    trace(ENVIRONMENT_STATE_DIR_KEY + "=" +
-          os.environ[ENVIRONMENT_STATE_DIR_KEY])
+    trace("%s=%s" % (ENVIRONMENT_STATE_DIR_KEY,
+          os.environ[ENVIRONMENT_STATE_DIR_KEY]))
 
 
 def set_log_env():
+    trace("Setting container logs environment variables...")
+
+    log_level_message = "Increase log level to \"debug\" or \"trace\" to dump all container environment variables."
+    if log_level >= LOG_LEVEL_DEBUG:
+        log_level_message = ""
+
+    info("%s=%s (%s) %s" % (ENVIRONMENT_LOG_LEVEL_KEY, log_level,
+         log_level_switcher_inv.get(log_level), log_level_message))
     os.environ[ENVIRONMENT_LOG_LEVEL_KEY] = xstr(log_level)
-    info(ENVIRONMENT_LOG_LEVEL_KEY + "=" + os.environ[ENVIRONMENT_LOG_LEVEL_KEY] + " (" + log_level_switcher_inv.get(int(
-        os.environ[ENVIRONMENT_LOG_LEVEL_KEY])) + ") Increase log level to \"debug\" or \"trace\" to dump all container environment variables.")
 
     log_format = "CONSOLE"
-    log_format_message = " Run container with command argument --logjson to switch to JSON log format."
+    log_format_message = "Run container with command argument --logjson to switch to JSON log format."
     if log_json:
         log_format = "JSON"
         log_format_message = ""
 
+    info("%s=%s %s" % (ENVIRONMENT_LOG_FORMAT_KEY,
+         log_format, log_format_message))
     os.environ[ENVIRONMENT_LOG_FORMAT_KEY] = log_format
-    info(ENVIRONMENT_LOG_FORMAT_KEY + "=" +
-         os.environ[ENVIRONMENT_LOG_FORMAT_KEY] + log_format_message)
 
 
 def get_container_image():
-    return os.environ.get(ENVIRONMENT_IMAGE_NAME_KEY, '') + ':' + os.environ.get(ENVIRONMENT_IMAGE_TAG_KEY, '')
+    return "%s:%s" % (os.environ.get(ENVIRONMENT_IMAGE_NAME_KEY, ""), os.environ.get(ENVIRONMENT_IMAGE_TAG_KEY, ""))
 
 
 def is_multiprocess_container():
@@ -379,11 +388,11 @@ def is_single_process_container():
 
 def get_container_process():
     for p in listdir(RUN_PROCESS_DIR):
-        return os.path.join(RUN_PROCESS_DIR, p, 'run')
+        return os.path.join(RUN_PROCESS_DIR, p, "run")
 
 
 def is_runit_installed():
-    return os.path.exists('/usr/bin/sv')
+    return os.path.exists("/usr/bin/sv")
 
 
 # Waits for the child process with the given PID, while at the same time
@@ -524,7 +533,7 @@ def run_process(args, background_process_name, background_process_command):
 
 
 def run_background_process(name, command):
-    info("Running " + name + "...")
+    info("Running %s..." % name)
     pid = os.spawnvp(os.P_NOWAIT, command[0], command)
     debug("%s started as PID %d" % (name, pid))
     return pid
@@ -538,7 +547,7 @@ def wait_background_process(name, pid):
     process_exited, exit_code = wait_for_process_or_interrupt(pid)
     if process_exited:
         if exit_code is None:
-            info(name + " exited with unknown status")
+            info("%s exited with unknown status" % name)
             exit_status = 1
         else:
             exit_status = os.WEXITSTATUS(exit_code)
@@ -581,8 +590,8 @@ def wait_for_runit_services():
     debug("Waiting for runit services to exit...")
     done = False
     while not done:
-        done = subprocess.run("/usr/bin/sv status " + RUN_PROCESS_DIR +
-                              "/* | grep -q '^run:'", shell=True).returncode != 0
+        done = subprocess.run("/usr/bin/sv status %s/* | grep -q '^run:'" %
+                              RUN_PROCESS_DIR, shell=True).returncode != 0
         if not done:
             time.sleep(0.1)
             shutdown_runit_services()
@@ -626,7 +635,7 @@ def run_single_process_container(args):
 
 def run_no_process_container(args):
     if len(args.main_command) == 0:
-        args.main_command = ['bash']  # Run bash by default.
+        args.main_command = ["bash"]  # Run bash by default.
 
     exit_status = run_foreground_process(args.main_command)
     sys.exit(exit_status)
@@ -636,9 +645,9 @@ def run_cmds(cmds, when):
     if not cmds:
         return
 
-    debug("Run commands before " + when + "...")
+    debug("Run pre-%s commands..." % when)
     for cmd in cmds:
-        info("Running " + cmd + "...")
+        info("Running %s... " % cmd)
         run_command_killable(shlex.split(cmd))
 
 
@@ -663,11 +672,11 @@ def main(args):
         debug_env()
 
     if not args.skip_startup:
-        run_cmds(args.pre_startup_cmds, 'startup')
+        run_cmds(args.pre_startup_cmds, "startup")
         run_script_files(RUN_STARTUP_DIR)
 
     if not args.skip_process:
-        run_cmds(args.pre_process_cmds, 'process')
+        run_cmds(args.pre_process_cmds, "process")
 
         if is_single_process_container():
             run_single_process_container(args)
@@ -678,72 +687,72 @@ def main(args):
 
 
 # Command line options.
-parser = argparse.ArgumentParser(prog='', description='Container image: ' + get_container_image(
-), epilog='Built with osixia/light-baseimage (https://github.com/osixia/docker-light-baseimage) 🐳✨🌴')
+parser = argparse.ArgumentParser(prog="", description="Container image: %s" % get_container_image(
+), epilog="Built with osixia/light-baseimage (https://github.com/osixia/docker-light-baseimage) 🐳✨🌴")
 
-parser.add_argument('main_command', metavar='MAIN_COMMAND', type=str, nargs='*',
-                    help='the main command to run in addition of container processes (default value: /bin/bash if the container have no process, none otherwise)')
-parser.add_argument('-v', '--version', dest='version',
-                    action='store_true',
-                    help='print container image version')
+parser.add_argument("main_command", metavar="MAIN_COMMAND", type=str, nargs="*",
+                    help="the main command to run in addition of container processes, default: /bin/bash if the container have no process, none otherwise")
+parser.add_argument("-v", "--version", dest="version",
+                    action="store_true",
+                    help="print container image version")
 
-generator_group = parser.add_argument_group('templates generator')
-generator_group.add_argument('--generate', type=str, choices=["dockerfile", "dagger.io"], dest='generate',
-                             help='generate base templates for single process image')
-generator_group.add_argument('--generate-multiprocess', type=str, choices=["dockerfile", "dagger.io"], dest='generate_multiprocess',
-                             help='generate base templates for multiprocess image')
-generator_group.add_argument('--generate-service', metavar='NAME', dest='generate_service', action='append',
-                             help='generate NAME service templates')
-generator_group.add_argument('--generate-service-available', metavar='NAME', dest='generate_service_available', action='append',
-                             help='generate NAME service available templates')
+generator_group = parser.add_argument_group("templates generator")
+generator_group.add_argument("--generate", type=str, choices=["dockerfile", "dagger.io"], dest="generate",
+                             help="generate base templates for single process image")
+generator_group.add_argument("--generate-multiprocess", type=str, choices=["dockerfile", "dagger.io"], dest="generate_multiprocess",
+                             help="generate base templates for multiprocess image")
+generator_group.add_argument("--generate-service", metavar="NAME", dest="generate_service", action="append",
+                             help="generate NAME service templates")
+generator_group.add_argument("--generate-service-available", metavar="NAME", dest="generate_service_available", action="append",
+                             help="generate NAME service available templates")
 
-environment_group = parser.add_argument_group('environment variables')
-environment_group.add_argument('-e', '--skip-env-files', dest='skip_env_files',
-                               action='store_true',
-                               help='skip getting environment variables values from .env file(s)')
+environment_group = parser.add_argument_group("environment variables")
+environment_group.add_argument("-e", "--skip-env-files", dest="skip_env_files",
+                               action="store_true",
+                               help="skip getting environment variables values from .env file(s)")
 
-lifecycle_group = parser.add_argument_group('container lifecycle steps')
-lifecycle_group.add_argument('-s', '--skip-startup', dest='skip_startup',
-                             action='store_true',
-                             help='skip running pre-startup-cmd and service(s) startup.sh script(s)')
-lifecycle_group.add_argument('-p', '--skip-process', dest='skip_process',
-                             action='store_true',
-                             help='skip running pre-process-cmd and service(s) process.sh script(s)')
-lifecycle_group.add_argument('-f', '--skip-finish', dest='skip_finish',
-                             action='store_true',
-                             help='skip running pre-finish-cmd and service(s) finish.sh script(s)')
-lifecycle_group.add_argument('-o', '--run-only', type=str, choices=["startup", "process", "finish"], dest='run_only',
-                             help='run only this file type and ignore others')
+lifecycle_group = parser.add_argument_group("container lifecycle steps")
+lifecycle_group.add_argument("-s", "--skip-startup", dest="skip_startup",
+                             action="store_true",
+                             help="skip running pre-startup-cmd and service(s) startup.sh script(s)")
+lifecycle_group.add_argument("-p", "--skip-process", dest="skip_process",
+                             action="store_true",
+                             help="skip running pre-process-cmd and service(s) process.sh script(s)")
+lifecycle_group.add_argument("-f", "--skip-finish", dest="skip_finish",
+                             action="store_true",
+                             help="skip running pre-finish-cmd and service(s) finish.sh script(s)")
+lifecycle_group.add_argument("-o", "--run-only", type=str, choices=["startup", "process", "finish"], dest="run_only",
+                             help="run only this file type and ignore others")
 
-commands_group = parser.add_argument_group('commands lifecycle hooks')
-commands_group.add_argument('--pre-startup-cmd', metavar='COMMAND', dest='pre_startup_cmds', action='append',
-                            help='run COMMAND before startup file(s)')
-commands_group.add_argument('--pre-process-cmd', metavar='COMMAND', dest='pre_process_cmds', action='append',
-                            help='run COMMAND before process file(s)')
-commands_group.add_argument('--pre-finish-cmd', metavar='COMMAND', dest='pre_finish_cmds', action='append',
-                            help='run COMMAND before finish file(s)')
-commands_group.add_argument('--pre-exit-cmd', metavar='COMMAND', dest='pre_exit_cmds', action='append',
-                            help='run COMMAND before container exits')
+commands_group = parser.add_argument_group("commands lifecycle hooks")
+commands_group.add_argument("-xps", "--pre-startup-cmd", metavar="COMMAND", dest="pre_startup_cmds", action="append",
+                            help="run COMMAND before startup file(s)")
+commands_group.add_argument("-xpp", "--pre-process-cmd", metavar="COMMAND", dest="pre_process_cmds", action="append",
+                            help="run COMMAND before process file(s)")
+commands_group.add_argument("-xpf", "--pre-finish-cmd", metavar="COMMAND", dest="pre_finish_cmds", action="append",
+                            help="run COMMAND before finish file(s)")
+commands_group.add_argument("-xpe", "--pre-exit-cmd", metavar="COMMAND", dest="pre_exit_cmds", action="append",
+                            help="run COMMAND before container exits")
 
-ci_cd_group = parser.add_argument_group('ci/cd')
-ci_cd_group.add_argument('-w', '--unsecure-fast-write', dest='unsecure_fast_write',
-                         action='store_true',
-                         help='disable fsync and friends with eatmydata LD_PRELOAD library')
+ci_cd_group = parser.add_argument_group("ci/cd")
+ci_cd_group.add_argument("-w", "--unsecure-fast-write", dest="unsecure_fast_write",
+                         action="store_true",
+                         help="disable fsync and friends with eatmydata LD_PRELOAD library")
 
-debug_group = parser.add_argument_group('debugging')
-debug_group.add_argument('-k', '--no-kill-all-on-exit', dest='kill_all_on_exit',
-                         action='store_false',
-                         help='don\'t kill all processes on the system upon exiting')
-debug_group.add_argument('-a', '--keep-alive', dest='keep_alive',
-                         action='store_true',
-                         help='keep alive container after all processes have exited')
+debug_group = parser.add_argument_group("debugging")
+debug_group.add_argument("-k", "--no-kill-all-on-exit", dest="kill_all_on_exit",
+                         action="store_false",
+                         help="don't kill all processes on the system upon exiting")
+debug_group.add_argument("-a", "--keep-alive", dest="keep_alive",
+                         action="store_true",
+                         help="keep alive container after all processes have exited")
 
-logs_group = parser.add_argument_group('logging')
-logs_group.add_argument('-j', '--logjson', dest='log_json',
-                        action='store_true',
-                        help='set log format to JSON.')
-logs_group.add_argument('-l', '--loglevel', type=str, choices=log_level_switcher.keys(), dest='log_level', default=log_level_switcher_inv.get(log_level),
-                        help='set log level, default: %s' % log_level_switcher_inv.get(log_level))
+logs_group = parser.add_argument_group("logging")
+logs_group.add_argument("-j", "--logjson", dest="log_json",
+                        action="store_true",
+                        help="set log format to JSON.")
+logs_group.add_argument("-l", "--loglevel", type=str, choices=log_level_switcher.keys(), dest="log_level", default=log_level_switcher_inv.get(log_level),
+                        help="set log level, default: %s" % log_level_switcher_inv.get(log_level))
 
 args = parser.parse_args()
 
@@ -787,9 +796,9 @@ if args.run_only is not None:
 
 # Run main function.
 signal.signal(signal.SIGTERM, lambda signum,
-              frame: ignore_signals_and_raise_keyboard_interrupt('SIGTERM'))
+              frame: ignore_signals_and_raise_keyboard_interrupt("SIGTERM"))
 signal.signal(signal.SIGINT, lambda signum,
-              frame: ignore_signals_and_raise_keyboard_interrupt('SIGINT'))
+              frame: ignore_signals_and_raise_keyboard_interrupt("SIGINT"))
 signal.signal(signal.SIGALRM, lambda signum, frame: raise_alarm_exception())
 
 exit_code = 0
@@ -806,21 +815,21 @@ except KeyboardInterrupt:
 
 finally:
     if not args.skip_finish:
-        run_cmds(args.pre_finish_cmds, 'finish')
+        run_cmds(args.pre_finish_cmds, "finish")
         run_script_files(RUN_FINISH_DIR)
 
     if args.kill_all_on_exit:
         kill_all_processes(KILL_ALL_PROCESSES_TIMEOUT)
 
-    run_cmds(args.pre_exit_cmds, 'exit')
+    run_cmds(args.pre_exit_cmds, "exit")
 
     if args.keep_alive:
         try:
-            info("All process have exited, keep container alive...")
+            info("All processes have exited, keep container alive...")
             while True:
                 time.sleep(60)
                 pass
         except:
-            error("Keep alive process ended :o")
+            warning("Keep alive process ended ☠")
 
     exit(exit_code)

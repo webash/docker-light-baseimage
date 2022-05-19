@@ -5,5 +5,5 @@ log-helper level eq trace && set -x
 # add-multiprocess-stack
 
 echo "Install the multiprocess stack: runit, syslog-ng-core, logrotate and cron"
-/container/tools/add-service-available :runit :syslog-ng-core :logrotate :cron
+/container/tools/add-services-available :runit :syslog-ng-core :logrotate :cron
 touch /container/multiprocess_stack_added

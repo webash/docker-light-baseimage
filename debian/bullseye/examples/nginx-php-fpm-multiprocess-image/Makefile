@@ -1,4 +1,4 @@
-NAME = osixia/multiple-process-image-example:2.0.0
+NAME = osixia/multiprocess-image-example:2.0.0
 
 .PHONY: build
 build:

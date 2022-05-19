@@ -10,7 +10,7 @@
 
 Debian 11 (Bullseye) and Alpine 3.15 docker base images to build reliable images quickly. 
 
-**This image provide a simple opinionated solution to build single or multiple processes images with minimum of layers and an optimized build.**
+**This image provide a simple opinionated solution to build single or multiprocess images with minimum of layers and an optimized build.**
 
 It helps speeding up image development and CI/CD pipelines by providing:
 
@@ -26,15 +26,18 @@ Run the following command to generate a Dockerfile and start building images bas
 # Debian
 docker run --rm osixia/light-baseimage:2.0.0 --generate dockerfile
 ```
+
 ```
 # Alpine
 docker run --rm osixia/light-baseimage:2.0.0-alpine --generate dockerfile
 ```
+
 Replace `--generate` with `--generate-multiprocess` to get a minimal multi processes templates and replace `dockerfile` with `dagger.io` to get a [dagger.io](https://dagger.io) example.
 
 ```
 docker run --rm --volume $(pwd)/example:/container/run/var/generate osixia/light-baseimage:2.0.0 --generate dockerfile
 ```
+
 ```
 tree -a example
 ```
@@ -55,6 +58,7 @@ example
 ```
 cd example
 ```
+
 ```
 cat Dockerfile
 ```
@@ -69,21 +73,21 @@ FROM osixia/light-baseimage:2.0.0
 # ENV CONTAINER_IMAGE_NAME=${IMAGE_NAME} \
 #     CONTAINER_IMAGE_TAG=${IMAGE_TAG}
 
-RUN packages-index-update \  <--- Remove this line
-    && packages-install-clean \  <--- Remove this line
-        [....]  <--- Remove this line
+RUN packages-index-update \     <--- Quick start example: Remove this line
+    && packages-install-clean \ <--- Quick start example: Remove this line
+        [....]                  <--- Quick start example: Remove this line
 
 COPY services /container/services
 
 RUN install-services
 
 COPY environment /container/environment/00-default
-
 ```
 
 ```
 docker build -t example/my-image:develop .
 ```
+
 ```
 docker run --rm example/my-image:develop
 ```
@@ -647,25 +651,25 @@ Please refer to [Run command line options](#run-command-line-options) for more i
 All container tools are available in `/container/tool` directory and are linked in `/sbin/` so they belong to the container PATH.
 
 
-| Filename        | Description |
-| ---------------- | ------------------- |
-| run | The run tool is defined as the image ENTRYPOINT (see [Dockerfile](image/Dockerfile)). It set environment and run  startup scripts and images process. More information in the [Advanced User Guide](#run). |
-| setuser | A tool for running a command as another user. Easier to use than su, has a smaller attack vector than sudo, and unlike chpst this tool sets $HOME correctly.|
-| log-helper | A simple bash tool to print message base on the log level. |
-|  add-service-available | A tool to download and add services in service-available directory to the regular service directory. |
-| add-multiple-process-stack | A tool to add the multiple process stack: runit, cron syslog-ng-core and logrotate. |
-| install-services | A tool that execute /container/service/install.sh and /container/service/\*/install.sh scripts. |
-|  complex-bash-env | A tool to iterate trough complex bash environment variables created by the run tool when a table or a list was set in environment files or in environment command line argument. |
+| Filename                   | Description                                                                                                                                                                                                |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| run                        | The run tool is defined as the image ENTRYPOINT (see [Dockerfile](image/Dockerfile)). It set environment and run  startup scripts and images process. More information in the [Advanced User Guide](#run). |
+| setuser                    | A tool for running a command as another user. Easier to use than su, has a smaller attack vector than sudo, and unlike chpst this tool sets $HOME correctly.                                               |
+| log-helper                 | A simple bash tool to print message base on the log level.                                                                                                                                                 |
+| add-service-available      | A tool to download and add services in service-available directory to the regular service directory.                                                                                                       |
+| add-multiple-process-stack | A tool to add the multiple process stack: runit, cron syslog-ng-core and logrotate.                                                                                                                        |
+| install-services           | A tool that execute /container/service/install.sh and /container/service/\*/install.sh scripts.                                                                                                            |
+| complex-bash-env           | A tool to iterate trough complex bash environment variables created by the run tool when a table or a list was set in environment files or in environment command line argument.                           |
 
 ### Services available
 
-| Name        | Description |
-| ---------------- | ------------------- |
-| :runit | Replaces Debian's Upstart. Used for service supervision and management. Much easier to use than SysV init and supports restarting daemons when they crash. Much easier to use and more lightweight than Upstart. <br><br>*This service is part of the multiple-process-stack.*|
-| :cron | Cron daemon. <br><br>*This service is part of the multiple-process-stack.*|
-| :syslog-ng-core | Syslog daemon so that many services - including the kernel itself - can correctly log to /var/log/syslog. If no syslog daemon is running, a lot of important messages are silently swallowed. <br><br>Only listens locally. All syslog messages are forwarded to "docker logs".<br><br>*This service is part of the multiple-process-stack.* |
-| :logrotate | Rotates and compresses logs on a regular basis. <br><br>*This service is part of the multiple-process-stack.*|
-| :ssl-tools | Add CFSSL a CloudFlare PKI/TLS swiss army knife. It's a command line tool for signing, verifying, and bundling TLS certificates. Comes with cfssl-helper tool that make it docker friendly by taking command line parameters from environment variables. <br><br>Also add jsonssl-helper to get certificates from json files, parameters are set by environment variables. |
+| Name            | Description                                                                                                                                                                                                                                                                                                                                                                |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| :runit          | Replaces Debian's Upstart. Used for service supervision and management. Much easier to use than SysV init and supports restarting daemons when they crash. Much easier to use and more lightweight than Upstart. <br><br>*This service is part of the multiple-process-stack.*                                                                                             |
+| :cron           | Cron daemon. <br><br>*This service is part of the multiple-process-stack.*                                                                                                                                                                                                                                                                                                 |
+| :syslog-ng-core | Syslog daemon so that many services - including the kernel itself - can correctly log to /var/log/syslog. If no syslog daemon is running, a lot of important messages are silently swallowed. <br><br>Only listens locally. All syslog messages are forwarded to "docker logs".<br><br>*This service is part of the multiple-process-stack.*                               |
+| :logrotate      | Rotates and compresses logs on a regular basis. <br><br>*This service is part of the multiple-process-stack.*                                                                                                                                                                                                                                                              |
+| :ssl-tools      | Add CFSSL a CloudFlare PKI/TLS swiss army knife. It's a command line tool for signing, verifying, and bundling TLS certificates. Comes with cfssl-helper tool that make it docker friendly by taking command line parameters from environment variables. <br><br>Also add jsonssl-helper to get certificates from json files, parameters are set by environment variables. |
 
 
 ## Advanced User Guide

@@ -34,7 +34,7 @@ dpkg-divert --local --rename --add /usr/bin/ischroot
 ln -sf /bin/true /usr/bin/ischroot
 
 ## Install apt-utils.
-ap install -y --no-install-recommends apt-utils apt-transport-https ca-certificates software-properties-common \
+apt install -y --no-install-recommends apt-utils apt-transport-https ca-certificates software-properties-common \
 locales python3-minimal python3-dotenv gettext-base jq eatmydata
 
 ## Upgrade all packages.

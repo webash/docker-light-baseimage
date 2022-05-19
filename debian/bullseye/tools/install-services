@@ -38,10 +38,10 @@ def install(script):
     if not os.access(script, os.X_OK):
         chmod_x(script)
 
-    print("Running " + script + "...")
+    print("Running %s..." % script)
     subprocess.run(script, shell=True)
 
-    print("Remove " + script)
+    print("Remove %s" % script)
     os.remove(script)
 
 
@@ -58,9 +58,9 @@ def link(script, dest):
     try:
         os.makedirs(os.path.dirname(dest), exist_ok=True)
         os.symlink(script, dest)
-        print("Link " + script + " to " + dest)
+        print("Link %s to %s" % (script, dest))
     except OSError as e:
-        print("Error: failed to link " + script + " to " + dest + ": " + str(e))
+        print("Error: failed to link %s to %s: %s" % (script, dest, str(e)))
         print_write_error_helper_and_exit()
 
 
@@ -110,20 +110,20 @@ for run_dir in (RUN_STARTUP_DIR, RUN_PROCESS_DIR, RUN_FINISH_DIR):
                         if(file.startswith(RUN_PROCESS_DIR)):
                             file = os.path.dirname(file)
 
-                        print("Remove " + file)
+                        print("Remove %s" % file)
                         os.remove(file)
 
                     except OSError as e:
-                        print("Error: failed to remove " + file + ": " + str(e))
+                        print("Error: failed to remove %s: %s" %
+                              (file, str(e)))
                         print_write_error_helper_and_exit()
 
                 if not os.access(file, os.X_OK):
-                    print("Error: file " + file +
-                          " needs executable permission")
+                    print("Error: file %s needs executable permission" % file)
                     exit(1)
 
 nb_process = len(os.listdir(RUN_PROCESS_DIR))
-print(str(nb_process) + " process found.")
+print("%s process found." % nb_process)
 
 # Multiprocess image.
 if nb_process > 1:
