@@ -14,13 +14,13 @@ Debian 11 (Bullseye) and Alpine 3.15 docker base images to build reliable images
 
 It helps speeding up image development and CI/CD pipelines by providing:
 
- - Greats building tools to **minimize the image number of layers and make best use of image build cache**.
+ - Greats building tools to **minimize the image number of layers and make best use of image cache**.
  - A nice init process as image entrypoint that add **helpfull extensions and options to fastly run and debug containers**.
  - Simple way to create **multiprocess images** if needed.
 
 ## 🕐 Quick Start
 
-Run the following command to generate a Dockerfile and start building images based on light-baseimage:
+Run the following command to generate example templates and start building an image based on light-baseimage:
 
 ```
 # Debian
@@ -32,10 +32,11 @@ docker run --rm osixia/light-baseimage:2.0.0 --generate dockerfile
 docker run --rm osixia/light-baseimage:2.0.0-alpine --generate dockerfile
 ```
 
-Replace `--generate` with `--generate-multiprocess` to get a minimal multi processes templates and replace `dockerfile` with `dagger.io` to get a [dagger.io](https://dagger.io) example.
+Replace `--generate` with `--generate-multiprocess` to get a minimal multiprocess example templates and replace `dockerfile` with `dagger.io` to get a [dagger.io](https://dagger.io) example.
 
 ```
-docker run --rm --volume $(pwd)/example:/container/run/var/generate osixia/light-baseimage:2.0.0 --generate dockerfile
+docker run --rm --volume $(pwd)/example:/container/run/var/generate \
+osixia/light-baseimage:2.0.0 --generate dockerfile
 ```
 
 ```
@@ -56,11 +57,7 @@ example
 ```
 
 ```
-cd example
-```
-
-```
-cat Dockerfile
+vim example/Dockerfile
 ```
 
 ```
@@ -85,7 +82,7 @@ COPY environment /container/environment/00-default
 ```
 
 ```
-docker build -t example/my-image:develop .
+docker build -t example/my-image:develop ./example
 ```
 
 ```
