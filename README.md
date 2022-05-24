@@ -18,7 +18,7 @@ It helps speeding up image development and CI/CD pipelines by providing:
  - A nice init process as image entrypoint that add **helpfull extensions and options to fastly run and debug containers**.
  - Simple way to create **multiprocess images** if needed.
 
-## 🕐 Quick Start
+## ⚡ Quick Start
 
 Run the following command to generate example templates and start building an image based on light-baseimage:
 
@@ -34,6 +34,7 @@ docker run --rm osixia/light-baseimage:2.0.0-alpine --generate dockerfile
 
 Replace `--generate` with `--generate-multiprocess` to get a minimal multiprocess example templates and replace `dockerfile` with `dagger.io` to get a [dagger.io](https://dagger.io) example.
 
+## 📌 First image in 2 minutes
 ```
 docker run --rm --volume $(pwd)/example:/container/run/var/generate \
 osixia/light-baseimage:2.0.0 --generate dockerfile
