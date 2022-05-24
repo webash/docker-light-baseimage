@@ -41,7 +41,7 @@ docker run --rm --volume $(pwd)/example:/container/run/var/generate \
 osixia/light-baseimage:2.0.0 --generate dockerfile
 ```
 
-List files in **example** directory
+List generated directories and files in **example** directory
 ```
 tree -a example
 ```
@@ -59,7 +59,7 @@ example
         └── startup.sh
 ```
 
-Edit the **Dockerfile** to remove the lines related to the packages installation  
+Edit the **Dockerfile** to remove the lines related to packages installation  
 ```
 vim example/Dockerfile
 ```
