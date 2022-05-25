@@ -74,9 +74,9 @@ FROM osixia/light-baseimage:2.0.0
 # ENV CONTAINER_IMAGE_NAME=${IMAGE_NAME} \
 #     CONTAINER_IMAGE_TAG=${IMAGE_TAG}
 
-RUN packages-index-update \     <--- Quick start example: Remove this line
-    && packages-install-clean \ <--- Quick start example: Remove this line
-        [....]                  <--- Quick start example: Remove this line
+RUN packages-index-update \     <--- Remove this line
+    && packages-install-clean \ <--- Remove this line
+        [....]                  <--- Remove this line
 
 COPY services /container/services
 
