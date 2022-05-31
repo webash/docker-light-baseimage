@@ -35,13 +35,13 @@ docker run --rm osixia/light-baseimage:2.0.0-alpine --generate dockerfile
 Replace `--generate` with `--generate-multiprocess` to get a minimal multiprocess example templates and replace `dockerfile` with `dagger.io` to get a [dagger.io](https://dagger.io) example.
 
 ## 🕑 First image in 2 minutes
-Generate single process image templates in the **example** directory
+Generate single process image templates in the **light-baseimage-example** directory
 ```
 docker run --rm --volume $(pwd)/light-baseimage-example:/container/run/var/generate \
 osixia/light-baseimage:2.0.0 --generate dockerfile
 ```
 
-List generated directories and files in **example** directory
+List generated directories and files in **light-baseimage-example** directory
 ```
 tree -a light-baseimage-example
 ```
@@ -84,7 +84,7 @@ RUN install-services
 
 COPY environment /container/environment/00-default
 ```
-Build the image **example/my-image:develop** using files in the **example** directory
+Build the image **example/my-image:develop** using files in the **light-baseimage-example** directory
 ```
 docker build -t example/my-image:develop ./light-baseimage-example
 ```
