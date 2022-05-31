@@ -8,7 +8,7 @@
 [![GitHub Stars](https://img.shields.io/github/stars/osixia/docker-light-baseimage?label=github%20stars&style=flat-square)][github]
 [![Contributors](https://img.shields.io/github/contributors/osixia/docker-light-baseimage?style=flat-square)](https://github.com/osixia/docker-light-baseimage/graphs/contributors)
 
-Debian 11 (Bullseye) and Alpine 3.15 docker base images to build reliable images quickly. 
+Debian 11 (Bullseye) and Alpine 3.15 container base images to build reliable images quickly.
 
 **This image provide a simple opinionated solution to build single or multiprocess images with minimum of layers and an optimized build.**
 
@@ -37,17 +37,17 @@ Replace `--generate` with `--generate-multiprocess` to get a minimal multiproces
 ## 🕑 First image in 2 minutes
 Generate single process image templates in the **example** directory
 ```
-docker run --rm --volume $(pwd)/example:/container/run/var/generate \
+docker run --rm --volume $(pwd)/light-baseimage-example:/container/run/var/generate \
 osixia/light-baseimage:2.0.0 --generate dockerfile
 ```
 
 List generated directories and files in **example** directory
 ```
-tree -a example
+tree -a light-baseimage-example
 ```
 
 ```
-example
+light-baseimage-example
 ├── Dockerfile
 ├── environment
 │   └── .env
@@ -61,7 +61,7 @@ example
 
 Edit the **Dockerfile** to remove the lines related to packages installation  
 ```
-vim example/Dockerfile
+vim light-baseimage-example/Dockerfile
 ```
 
 ```
@@ -86,7 +86,7 @@ COPY environment /container/environment/00-default
 ```
 Build the image **example/my-image:develop** using files in the **example** directory
 ```
-docker build -t example/my-image:develop ./example
+docker build -t example/my-image:develop ./light-baseimage-example
 ```
 Run **example/my-image:develop** image
 ```
@@ -101,7 +101,7 @@ See full documentation and complete feature list on osixia/light-basimage [docum
 
 ## ♥ Contributing
 
-If you find this image useful here's how you can help:
+If you find this project useful here's how you can help:
 
 - Send a pull request with new features and bug fixes.
 - Help new users with [issues](https://github.com/osixia/docker-light-baseimage/issues) they may encounter.
@@ -138,7 +138,8 @@ docker run osixia/light-baseimage:alpine-2.0.0 --help
 
 Table of Contents
 - [osixia/light-baseimage:2.0.0 🐳✨🌴](#osixialight-baseimage200-)
-  - [🕐 Quick Start](#-quick-start)
+  - [⚡ Quick Start](#-quick-start)
+  - [🕑 First image in 2 minutes](#-first-image-in-2-minutes)
   - [📄 Documentation](#-documentation)
   - [♥ Contributing](#-contributing)
   - [💥 Changelog](#-changelog)

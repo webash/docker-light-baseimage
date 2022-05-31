@@ -17,4 +17,4 @@ ENV LANG="en_US.UTF-8" \
     CONTAINER_IMAGE_NAME=${IMAGE_NAME} \
     CONTAINER_IMAGE_TAG=${IMAGE_TAG}
 
-ENTRYPOINT ["/container/tools/run"]
+ENTRYPOINT ["/container/tools/entrypoint"]

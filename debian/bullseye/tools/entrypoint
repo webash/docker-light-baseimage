@@ -259,10 +259,10 @@ def generate(option, service_name="my-service"):
         trace("Use temporary directory: %s" % tmpdir)
 
         if option == "dockerfile":
-            shutil.copy(os.path.join(TEMPLATES_DIR, "Dockerfile.tmpl"), tmpdir)
+            shutil.copy(os.path.join(TEMPLATES_DIR, "Dockerfile.template"), tmpdir)
         else:
             shutil.copy(os.path.join(TEMPLATES_DIR,
-                        "my_image.cue.tmpl"), tmpdir)
+                        "my_image.cue.template"), tmpdir)
 
         shutil.copytree(os.path.join(TEMPLATES_DIR, "environment"),
                         os.path.join(RUN_VAR_GENERATE_DIR, "environment"))
@@ -282,11 +282,11 @@ def generate_multiprocess(option):
         trace("Use temporary directory: %s" % tmpdir)
 
         if option == "dockerfile":
-            shutil.copy(os.path.join(TEMPLATES_DIR, "Dockerfile.multiprocess.tmpl"), os.path.join(
-                tmpdir, "Dockerfile.tmpl"))
+            shutil.copy(os.path.join(TEMPLATES_DIR, "Dockerfile.multiprocess.template"), os.path.join(
+                tmpdir, "Dockerfile.template"))
         else:
-            shutil.copy(os.path.join(TEMPLATES_DIR, "my_image.cue.multiprocess.tmpl"), os.path.join(
-                tmpdir, "my_image.cue.tmpl"))
+            shutil.copy(os.path.join(TEMPLATES_DIR, "my_image.cue.multiprocess.template"), os.path.join(
+                tmpdir, "my_image.cue.template"))
 
         generate_envsubst_templates(tmpdir)
 

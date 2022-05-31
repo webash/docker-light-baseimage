@@ -8,8 +8,8 @@ TO_INSTALL=(curl less procps psmisc strace vim-tiny)
 
 log-helper info "Install debug tools:" "${TO_INSTALL[@]}"
 
-if [ -n "$@" ]; then 
-    log-helper info "with extra package(s): $@"
+if [ -n "${*}" ]; then
+    log-helper info "with extra package(s): ${*}"
     TO_INSTALL+=("$@")
 fi
 
