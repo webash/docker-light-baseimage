@@ -38,7 +38,7 @@ log_level_switcher = {"none": LOG_LEVEL_NONE, "error": LOG_LEVEL_ERROR, "warning
 
 log_level_switcher_inv = {v: k for k, v in log_level_switcher.items()}
 
-# Keep sync with log-helper default values
+# Keep sync with values in log-helper file.
 log_level = LOG_LEVEL_INFO
 log_json = False
 

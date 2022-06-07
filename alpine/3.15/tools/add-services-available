@@ -10,22 +10,22 @@ DOWNLOAD_FILENAME="download.sh"
 
 for i in "$@"
 do
-    echo "add-services-available: ${i}"
+    log-helper info "add-services-available: ${i}"
     if  [ -d "${SERVICE_AVAILABLE_DIR}/${i}" ]; then
         
         if [ -f "${SERVICE_AVAILABLE_DIR}/${i}/${DOWNLOAD_FILENAME}" ]; then
-            echo "run ${SERVICE_AVAILABLE_DIR}/${i}/${DOWNLOAD_FILENAME}"
+            log-helper info "run ${SERVICE_AVAILABLE_DIR}/${i}/${DOWNLOAD_FILENAME}"
             eval "${SERVICE_AVAILABLE_DIR}/${i}/${DOWNLOAD_FILENAME}"
 
-            echo "remove ${SERVICE_AVAILABLE_DIR}/${i}/${DOWNLOAD_FILENAME}"
+            log-helper info "remove ${SERVICE_AVAILABLE_DIR}/${i}/${DOWNLOAD_FILENAME}"
             rm -f "${SERVICE_AVAILABLE_DIR}/${i}/${DOWNLOAD_FILENAME}"
         fi
         
-        echo "move ${SERVICE_AVAILABLE_DIR}/${i} to ${SERVICE_DIR}/${i}"
+        log-helper info "move ${SERVICE_AVAILABLE_DIR}/${i} to ${SERVICE_DIR}/${i}"
         mv "${SERVICE_AVAILABLE_DIR}/${i}" "${SERVICE_DIR}/${i}"
         
     else
-        echo "${i} not found in ${SERVICE_AVAILABLE_DIR}/${i}"
+        log-helper info "${i} not found in ${SERVICE_AVAILABLE_DIR}/${i}"
         exit 1
     fi
 done

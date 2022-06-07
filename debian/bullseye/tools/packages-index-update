@@ -5,4 +5,4 @@ log-helper level eq trace && set -x
 # packages-index-update
 
 log-helper info "Update packages index"
-apt -y update
+apt -qy update

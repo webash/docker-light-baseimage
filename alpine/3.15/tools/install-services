@@ -15,7 +15,7 @@ STARTUP_FILENAME = "startup.sh"
 PROCESS_FILENAME = "process.sh"
 FINISH_FILENAME = "finish.sh"
 
-# Keep sync with values in run file.
+# Keep sync with values in entrypoint file.
 RUN_DIR = "/container/run"
 RUN_STARTUP_DIR = RUN_DIR + "/startup"
 RUN_PROCESS_DIR = RUN_DIR + "/process"

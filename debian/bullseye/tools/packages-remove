@@ -4,5 +4,5 @@ log-helper level eq trace && set -x
 # Usage:
 # packages-remove [package 1] [package 2] ...
 
-apt remove -y --purge "$@"
+apt remove -qy --purge "$@"
 apt -qy autoremove

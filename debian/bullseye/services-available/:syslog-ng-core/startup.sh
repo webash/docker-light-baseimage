@@ -1,8 +1,10 @@
 #!/bin/bash -e
 log-helper level eq trace && set -x
 
-ln -sf "${CONTAINER_SERVICE_DIR}/:syslog-ng-core/assets/config/syslog_ng_default" /etc/default/syslog-ng
-ln -sf "${CONTAINER_SERVICE_DIR}/:syslog-ng-core/assets/config/syslog-ng.conf" /etc/syslog-ng/syslog-ng.conf
+CURRENT_SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+ln -sf "${CURRENT_SCRIPT_DIR}/:syslog-ng-core/assets/config/syslog_ng_default" /etc/default/syslog-ng
+ln -sf "${CURRENT_SCRIPT_DIR}/:syslog-ng-core/assets/config/syslog-ng.conf" /etc/syslog-ng/syslog-ng.conf
 
 # If /dev/log is either a named pipe or it was placed there accidentally,
 # e.g. because of the issue documented at https://github.com/phusion/baseimage-docker/pull/25,

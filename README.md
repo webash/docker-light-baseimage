@@ -97,7 +97,7 @@ docker run --rm example/my-image:develop
 
 ⚠ 2.0.0 release is out. Check the [1.x.x to 2.0.0 Migration Guide.]()
 
-See full documentation and complete feature list on osixia/light-basimage [documentation website.](https://opensource.osixia.net/containers/images/light-baseimage)
+See full documentation and complete feature list on osixia/light-baseimage [documentation website.](https://opensource.osixia.net/containers/images/light-baseimage)
 
 ## ♥ Contributing
 

@@ -19,7 +19,7 @@ export DEBIAN_FRONTEND=noninteractive
 ## http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=594189
 export INITRD=no
 
-apt -y update
+apt -qy update
 
 ## Fix some issues with APT packages.
 ## See https://github.com/dotcloud/docker/issues/1024
@@ -33,12 +33,12 @@ ln -sf /bin/true /sbin/initctl
 dpkg-divert --local --rename --add /usr/bin/ischroot
 ln -sf /bin/true /usr/bin/ischroot
 
-## Install apt-utils.
-apt install -y --no-install-recommends apt-utils apt-transport-https ca-certificates software-properties-common \
+## Install required packages.
+apt install -qy --no-install-recommends apt-utils apt-transport-https ca-certificates software-properties-common \
 locales python3-minimal python3-dotenv gettext-base jq eatmydata
 
 ## Upgrade all packages.
-apt dist-upgrade -y --no-install-recommends -o Dpkg::Options::="--force-confold"
+apt dist-upgrade -qy --no-install-recommends -o Dpkg::Options::="--force-confold"
 
 # Fix locale
 echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen

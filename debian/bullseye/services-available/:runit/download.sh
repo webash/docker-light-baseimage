@@ -1,4 +1,4 @@
 #!/bin/bash -e
 
 # download runit
-/container/tools/packages-installrunit
+/container/tools/packages-install runit
