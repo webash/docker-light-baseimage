@@ -1,7 +1,7 @@
 GIT_BRANCH_SLUG = $(shell git rev-parse --abbrev-ref HEAD | sed 's|/|-|g')
 
 export IMAGE_NAME = osixia/light-baseimage
-export IMAGE_VERSION = $(GIT_BRANCH_SLUG)
+export IMAGE_TAG = local-$(GIT_BRANCH_SLUG)
 
 DEBIAN_BULLSEYE_PATH = ./debian/bullseye
 ALPINE_315_PATH = ./alpine/3.15
@@ -12,7 +12,6 @@ MAIN_IMAGE_PATH = $(DEBIAN_BULLSEYE_PATH)
 copy-distribution-shared-files:
 	@echo Copy from $(MAIN_IMAGE_PATH) to $(ALPINE_315_PATH)
 	@cp -f $(MAIN_IMAGE_PATH)/Dockerfile $(ALPINE_315_PATH)/
-	@cp -f $(MAIN_IMAGE_PATH)/.dockerignore $(ALPINE_315_PATH)/
 	@cp -rf $(MAIN_IMAGE_PATH)/templates $(ALPINE_315_PATH)/
 	@find $(MAIN_IMAGE_PATH)/tools -type f ! -name packages-* -exec cp -t $(ALPINE_315_PATH)/tools {} +
 

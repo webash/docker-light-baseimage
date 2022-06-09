@@ -90,7 +90,7 @@ docker build -t example/my-image:develop ./light-baseimage-example
 ```
 Run **example/my-image:develop** image
 ```
-docker run --rm example/my-image:develop
+docker run example/my-image:develop
 ```
 
 ## 📄 Documentation
@@ -99,6 +99,8 @@ docker run --rm example/my-image:develop
 
 See full documentation and complete feature list on osixia/light-baseimage [documentation website.](https://opensource.osixia.net/containers/images/light-baseimage)
 
+Or go directly to the [🎨 examples](docs/examples).
+
 ## ♥ Contributing
 
 If you find this project useful here's how you can help:
@@ -106,6 +108,10 @@ If you find this project useful here's how you can help:
 - Send a pull request with new features and bug fixes.
 - Help new users with [issues](https://github.com/osixia/docker-light-baseimage/issues) they may encounter.
 - Support the development of this image and star [this repo][github] and the image [docker hub repository.][docker hub]
+
+## 🔓 License
+
+This project is licensed under the terms of the MIT license. See [LICENSE](LICENSE) file for more information.
 
 ## 💥 Changelog
 
@@ -142,6 +148,7 @@ Table of Contents
   - [🕑 First image in 2 minutes](#-first-image-in-2-minutes)
   - [📄 Documentation](#-documentation)
   - [♥ Contributing](#-contributing)
+  - [🔓 License](#-license)
   - [💥 Changelog](#-changelog)
 - [osixia/light-baseimage ✨🌴](#osixialight-baseimage-)
   - [Contributing](#contributing)

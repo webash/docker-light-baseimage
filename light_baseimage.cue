@@ -9,14 +9,14 @@ import (
 
 #ImageId: {
     name: string
-    version: string
+    tag: string
 }
 
 #Image: {
     path: string
 
     imageId: #ImageId
-    tags: [...string]
+    tagSuffixes: [...string]
 
     baseimageName: string
     baseimageTag: string
@@ -29,16 +29,15 @@ import (
 
     _imageSource: core.#Source & {
         path: image.path
-        include: ["Dockerfile", "build", "tools", "services-available", "templates"]
     }
 
     _build: {
-        for idx, tag in image.tags {
+        for idx, tag in image.tagSuffixes {
             "_\(idx)": {
 
-                _fullTagName: *image.imageId.version | string
+                _fullTagName: *image.imageId.tag | string
                 if tag !="" {
-                    _fullTagName: image.imageId.version + "-" + tag
+                    _fullTagName: image.imageId.tag + "-" + tag
                 }
 
                 _buildTag: docker.#Dockerfile & {
@@ -67,21 +66,21 @@ dagger.#Plan & {
         network: "unix:///var/run/docker.sock": connect: dagger.#Socket
         env: {
             IMAGE_NAME: string | *"osixia/light-baseimage"
-            IMAGE_VERSION: string | *"develop"
+            IMAGE_TAG: string | *"local"
         }
     }
 
     _imageId: #ImageId & {
         name: client.env.IMAGE_NAME
-        version: client.env.IMAGE_VERSION
+        tag: client.env.IMAGE_TAG
     }
 
     _debianBullseyeImage: #Image & {
         path: "./debian/bullseye"
 
         imageId: _imageId
-        tags: ["", "debian", "debian-bullseye"]
-        
+        tagSuffixes: ["", "debian", "debian-bullseye"]
+
         baseimageName: "debian"
         baseimageTag: "bullseye-slim"
     }
@@ -90,8 +89,8 @@ dagger.#Plan & {
         path: "./alpine/3.15"
 
         imageId: _imageId
-        tags: ["alpine", "alpine-3", "alpine-3.15"]
-        
+        tagSuffixes: ["alpine", "alpine-3", "alpine-3.15"]
+
         baseimageName: "alpine"
         baseimageTag: "3.15"
     }
