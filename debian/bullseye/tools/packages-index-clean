@@ -5,6 +5,6 @@ log-helper level eq trace && set -x
 # packages-index-clean
 
 log-helper info "Clean packages index"
-apt -qy autoremove
-apt clean
-rm -r /var/lib/apt/lists/*
+apt -qy autoremove 2>&1 | log-helper debug
+apt clean 2>&1 | log-helper debug
+rm -rf /var/lib/apt/lists/*

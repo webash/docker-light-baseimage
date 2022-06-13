@@ -37,7 +37,7 @@ Replace `--generate` with `--generate-multiprocess` to get a minimal multiproces
 ## 🕑 First image in 2 minutes
 Generate single process image templates in the **light-baseimage-example** directory
 ```
-docker run --rm --volume $(pwd)/light-baseimage-example:/container/run/var/generate \
+docker run --rm --volume $(pwd)/light-baseimage-example:/container/var/generator \
 osixia/light-baseimage:2.0.0 --generate dockerfile
 ```
 
@@ -99,7 +99,7 @@ docker run example/my-image:develop
 
 See full documentation and complete feature list on osixia/light-baseimage [documentation website.](https://opensource.osixia.net/containers/images/light-baseimage)
 
-Or go directly to the [🎨 examples](docs/examples).
+Or for the more adventurous go directly to the [🎨 examples](docs/examples).
 
 ## ♥ Contributing
 

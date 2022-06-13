@@ -13,7 +13,6 @@ ENV LANG="en_US.UTF-8" \
     LANGUAGE="en_US:en" \
     LC_ALL="en_US.UTF-8" \
     LC_CTYPE="en_US.UTF-8" \
-    INITRD="no" \
     CONTAINER_IMAGE_NAME=${IMAGE_NAME} \
     CONTAINER_IMAGE_TAG=${IMAGE_TAG}
 

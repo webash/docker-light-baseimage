@@ -16,4 +16,4 @@ if [[ $ARGS =~ $RECOMMENDS ]]; then
 fi
 
 log-helper info "Install packages: ${ARGS}"
-eval apt install -qy "${NO_RECOMMENDS}" "${ARGS}"
+eval apt install -qy "${NO_RECOMMENDS}" "${ARGS}" 2>&1 | log-helper debug
