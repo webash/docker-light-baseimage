@@ -60,7 +60,6 @@ ENTRYPOINT_PROCESS_DIR = ENTRYPOINT_DIR + "/process"
 ENTRYPOINT_FINISH_DIR = ENTRYPOINT_DIR + "/finish"
 
 VAR_DIR = "/container/var"
-VAR_STATE_DIR = VAR_DIR + "/state"
 VAR_GENERATOR_DIR = VAR_DIR + "/generator"
 
 
@@ -641,13 +640,13 @@ def run_cmds(cmds, when):
 def main(args):
     set_log_env()
 
-    if args.debug is not None:
-        subprocess.run("/container/tools/install-debug-tools %s" %
-                       " ".join(args.debug), shell=True)
-
     if args.unsecure_fast_write:
         info("Unsecure fast write is enabled: setting LD_PRELOAD=libeatmydata.so")
         os.environ["LD_PRELOAD"] = "libeatmydata.so"
+
+    if args.debug is not None:
+        subprocess.run("/container/tools/install-debug-tools %s" %
+                       " ".join(args.debug), shell=True)
 
     try:
         debug(subprocess.run("/container/tools/install-services",
@@ -701,7 +700,7 @@ environment_group.add_argument("-e", "--skip-env-files", dest="skip_env_files",
                                action="store_true",
                                help="skip getting environment variables values from .env file(s)")
 
-lifecycle_group = parser.add_argument_group("container lifecycle steps")
+lifecycle_group = parser.add_argument_group("container lifecycle")
 lifecycle_group.add_argument("-s", "--skip-startup", dest="skip_startup",
                              action="store_true",
                              help="skip running pre-startup-cmd and service(s) startup.sh script(s)")
@@ -714,7 +713,7 @@ lifecycle_group.add_argument("-f", "--skip-finish", dest="skip_finish",
 lifecycle_group.add_argument("-o", "--run-only", type=str, choices=["startup", "process", "finish"], dest="run_only",
                              help="run only this file type and ignore others")
 
-commands_group = parser.add_argument_group("commands lifecycle hooks")
+commands_group = parser.add_argument_group("commands hooks")
 commands_group.add_argument("-xps", "--pre-startup-cmd", metavar="COMMAND", dest="pre_startup_cmds", action="append",
                             help="run COMMAND before startup file(s)")
 commands_group.add_argument("-xpp", "--pre-process-cmd", metavar="COMMAND", dest="pre_process_cmds", action="append",
@@ -731,7 +730,7 @@ ci_cd_group.add_argument("-w", "--unsecure-fast-write", dest="unsecure_fast_writ
 
 debug_group = parser.add_argument_group("debugging")
 debug_group.add_argument("-d", "--debug", dest="debug", nargs="*", metavar="EXTRA PACKAGE",
-                         help="set log level to debug and install debug tools with optional extra packages as argument")
+                         help="set log level to debug and install debug tools (curl less procps psmisc strace vim), set extra packages to install as argument")
 debug_group.add_argument("-k", "--no-kill-all-on-exit", dest="kill_all_on_exit",
                          action="store_false",
                          help="don't kill all processes on the system upon exiting")

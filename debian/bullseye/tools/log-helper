@@ -102,7 +102,11 @@ function trace() {
 
 function getMsgFromStdin() {
     if [ -z "$2" ]; then
-        echo_msg=$(cat)
+        while IFS= read -r line; do
+            $0 $call $1 "$line"
+        done
+
+        exit 0
     fi
 }
 

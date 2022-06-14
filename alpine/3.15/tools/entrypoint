@@ -42,28 +42,25 @@ log_level_switcher_inv = {v: k for k, v in log_level_switcher.items()}
 log_level = LOG_LEVEL_INFO
 log_json = False
 
+ENVIRONMENT_LOG_LEVEL_KEY = "CONTAINER_LOG_LEVEL"
+ENVIRONMENT_LOG_FORMAT_KEY = "CONTAINER_LOG_FORMAT"
+
+ENVIRONMENT_IMAGE_NAME_KEY = "CONTAINER_IMAGE_NAME"
+ENVIRONMENT_IMAGE_TAG_KEY = "CONTAINER_IMAGE_TAG"
+
 ENVIRONMENT_FILES_IMPORT_DIR = "/container/environment"
 ENVIRONMENT_FILES_PREFIX = (".env")
 
 TEMPLATES_DIR = "/container/templates"
 
 # Keep sync with values in install-services file.
-RUN_DIR = "/container/run"
-RUN_STARTUP_DIR = RUN_DIR + "/startup"
-RUN_PROCESS_DIR = RUN_DIR + "/process"
-RUN_FINISH_DIR = RUN_DIR + "/finish"
+ENTRYPOINT_DIR = "/container/entrypoint"
+ENTRYPOINT_STARTUP_DIR = ENTRYPOINT_DIR + "/startup"
+ENTRYPOINT_PROCESS_DIR = ENTRYPOINT_DIR + "/process"
+ENTRYPOINT_FINISH_DIR = ENTRYPOINT_DIR + "/finish"
 
-RUN_VAR_DIR = "/container/run/var"
-RUN_VAR_STATE_DIR = RUN_VAR_DIR + "/state"
-RUN_VAR_GENERATE_DIR = RUN_VAR_DIR + "/generate"
-
-ENVIRONMENT_LOG_LEVEL_KEY = "CONTAINER_LOG_LEVEL"
-ENVIRONMENT_LOG_FORMAT_KEY = "CONTAINER_LOG_FORMAT"
-ENVIRONMENT_VAR_DIR_KEY = "CONTAINER_VAR_DIR"
-ENVIRONMENT_STATE_DIR_KEY = "CONTAINER_STATE_DIR"
-
-ENVIRONMENT_IMAGE_NAME_KEY = "CONTAINER_IMAGE_NAME"
-ENVIRONMENT_IMAGE_TAG_KEY = "CONTAINER_IMAGE_TAG"
+VAR_DIR = "/container/var"
+VAR_GENERATOR_DIR = VAR_DIR + "/generator"
 
 
 class AlarmException(Exception):
@@ -163,20 +160,20 @@ def generator(args):
 
     generator_print_files = False
 
-    if not os.path.isdir(RUN_VAR_GENERATE_DIR):
+    if not os.path.isdir(VAR_GENERATOR_DIR):
         generator_print_files = True
 
         warning("Generator directory not found: %s. Generated files will be printed to the console." %
-                RUN_VAR_GENERATE_DIR)
+                VAR_GENERATOR_DIR)
         warning("To get generated files directly on your file system mount a host directory to %s." %
-                RUN_VAR_GENERATE_DIR)
-        warning("docker run --rm --volume $(pwd)/example:%s %s %s" % (RUN_VAR_GENERATE_DIR,
+                VAR_GENERATOR_DIR)
+        warning("docker run --rm --volume $(pwd)/example:%s %s %s" % (VAR_GENERATOR_DIR,
                 get_container_image(), get_generator_command_line_options(args)))
 
         try:
-            os.mkdir(RUN_VAR_GENERATE_DIR)
+            os.mkdir(VAR_GENERATOR_DIR)
         except OSError as e:
-            error("Error creating %s directory" % RUN_VAR_GENERATE_DIR)
+            error("Error creating %s directory" % VAR_GENERATOR_DIR)
             sys.exit(1)
 
     if args.generate:
@@ -196,12 +193,12 @@ def generator(args):
     if generator_print_files:
         separator = "--------------------------------------------------------------------------------"
 
-        for subdir, _, files in os.walk(RUN_VAR_GENERATE_DIR):
+        for subdir, _, files in os.walk(VAR_GENERATOR_DIR):
             for file in files:
                 file_path = os.path.join(subdir, file)
 
                 print(separator)
-                print(file_path.replace(RUN_VAR_GENERATE_DIR, ""))
+                print(file_path.replace(VAR_GENERATOR_DIR, ""))
                 print(separator)
 
                 with open(file_path, "r") as f:
@@ -244,9 +241,9 @@ def generate_envsubst_templates(source, dest=None, environ=None):
         subprocess_environ = subprocess_environ | environ
 
     if dest:
-        dest = os.path.join(RUN_VAR_GENERATE_DIR, dest)
+        dest = os.path.join(VAR_GENERATOR_DIR, dest)
     else:
-        dest = RUN_VAR_GENERATE_DIR
+        dest = VAR_GENERATOR_DIR
 
     subprocess.run("envsubst-templates %s %s" %
                    (source, dest), shell=True, env=subprocess_environ)
@@ -259,13 +256,14 @@ def generate(option, service_name="my-service"):
         trace("Use temporary directory: %s" % tmpdir)
 
         if option == "dockerfile":
-            shutil.copy(os.path.join(TEMPLATES_DIR, "Dockerfile.template"), tmpdir)
+            shutil.copy(os.path.join(TEMPLATES_DIR,
+                        "Dockerfile.template"), tmpdir)
         else:
             shutil.copy(os.path.join(TEMPLATES_DIR,
                         "my_image.cue.template"), tmpdir)
 
         shutil.copytree(os.path.join(TEMPLATES_DIR, "environment"),
-                        os.path.join(RUN_VAR_GENERATE_DIR, "environment"))
+                        os.path.join(VAR_GENERATOR_DIR, "environment"))
 
         generate_envsubst_templates(tmpdir)
 
@@ -340,18 +338,6 @@ def set_env(env):
             os.environ[k] = v
 
 
-def set_dir_env():
-    trace("Setting container directories environment variables...")
-
-    os.environ[ENVIRONMENT_VAR_DIR_KEY] = RUN_VAR_DIR
-    trace("%s=%s" % (ENVIRONMENT_VAR_DIR_KEY,
-          os.environ[ENVIRONMENT_VAR_DIR_KEY]))
-
-    os.environ[ENVIRONMENT_STATE_DIR_KEY] = RUN_VAR_STATE_DIR
-    trace("%s=%s" % (ENVIRONMENT_STATE_DIR_KEY,
-          os.environ[ENVIRONMENT_STATE_DIR_KEY]))
-
-
 def set_log_env():
     trace("Setting container logs environment variables...")
 
@@ -379,16 +365,16 @@ def get_container_image():
 
 
 def is_multiprocess_container():
-    return len(listdir(RUN_PROCESS_DIR)) > 1
+    return len(listdir(ENTRYPOINT_PROCESS_DIR)) > 1
 
 
 def is_single_process_container():
-    return len(listdir(RUN_PROCESS_DIR)) == 1
+    return len(listdir(ENTRYPOINT_PROCESS_DIR)) == 1
 
 
 def get_container_process():
-    for p in listdir(RUN_PROCESS_DIR):
-        return os.path.join(RUN_PROCESS_DIR, p, "run")
+    for p in listdir(ENTRYPOINT_PROCESS_DIR):
+        return os.path.join(ENTRYPOINT_PROCESS_DIR, p, "run")
 
 
 def is_runit_installed():
@@ -583,7 +569,7 @@ def run_foreground_process(command):
 def shutdown_runit_services():
     debug("Begin shutting down runit services...")
     subprocess.run("/usr/bin/sv -w %d force-stop %s/* > /dev/null" %
-                   (KILL_PROCESS_TIMEOUT, RUN_PROCESS_DIR), shell=True)
+                   (KILL_PROCESS_TIMEOUT, ENTRYPOINT_PROCESS_DIR), shell=True)
 
 
 def wait_for_runit_services():
@@ -591,7 +577,7 @@ def wait_for_runit_services():
     done = False
     while not done:
         done = subprocess.run("/usr/bin/sv status %s/* | grep -q '^run:'" %
-                              RUN_PROCESS_DIR, shell=True).returncode != 0
+                              ENTRYPOINT_PROCESS_DIR, shell=True).returncode != 0
         if not done:
             time.sleep(0.1)
             shutdown_runit_services()
@@ -606,7 +592,7 @@ def run_multiprocess_container(args):
     background_process_pid = None
 
     try:
-        runit_command = ["/usr/bin/runsvdir", "-P", RUN_PROCESS_DIR]
+        runit_command = ["/usr/bin/runsvdir", "-P", ENTRYPOINT_PROCESS_DIR]
         background_process_pid, background_process_exited, exit_status = run_process(
             args, "runit daemon", runit_command)
 
@@ -652,12 +638,15 @@ def run_cmds(cmds, when):
 
 
 def main(args):
-    set_dir_env()
     set_log_env()
 
     if args.unsecure_fast_write:
         info("Unsecure fast write is enabled: setting LD_PRELOAD=libeatmydata.so")
         os.environ["LD_PRELOAD"] = "libeatmydata.so"
+
+    if args.debug is not None:
+        subprocess.run("/container/tools/install-debug-tools %s" %
+                       " ".join(args.debug), shell=True)
 
     try:
         debug(subprocess.run("/container/tools/install-services",
@@ -673,7 +662,7 @@ def main(args):
 
     if not args.skip_startup:
         run_cmds(args.pre_startup_cmds, "startup")
-        run_script_files(RUN_STARTUP_DIR)
+        run_script_files(ENTRYPOINT_STARTUP_DIR)
 
     if not args.skip_process:
         run_cmds(args.pre_process_cmds, "process")
@@ -692,18 +681,18 @@ parser = argparse.ArgumentParser(prog="", description="Container image: %s" % ge
 
 parser.add_argument("main_command", metavar="MAIN_COMMAND", type=str, nargs="*",
                     help="the main command to run in addition of container processes, default: /bin/bash if the container have no process, none otherwise")
-parser.add_argument("-v", "--version", dest="version",
-                    action="store_true",
-                    help="print container image version")
+
+parser.add_argument("-v", "--version", action='version',
+                    version=get_container_image(), help="print container image version")
 
 generator_group = parser.add_argument_group("templates generator")
-generator_group.add_argument("--generate", type=str, choices=["dockerfile", "dagger.io"], dest="generate",
+generator_group.add_argument("-gen", "--generate", type=str, choices=["dockerfile", "dagger.io"], dest="generate",
                              help="generate base templates for single process image")
-generator_group.add_argument("--generate-multiprocess", type=str, choices=["dockerfile", "dagger.io"], dest="generate_multiprocess",
+generator_group.add_argument("-gmu", "--generate-multiprocess", type=str, choices=["dockerfile", "dagger.io"], dest="generate_multiprocess",
                              help="generate base templates for multiprocess image")
-generator_group.add_argument("--generate-service", metavar="NAME", dest="generate_service", action="append",
+generator_group.add_argument("-gse", "--generate-service", metavar="NAME", dest="generate_service", action="append",
                              help="generate NAME service templates")
-generator_group.add_argument("--generate-service-available", metavar="NAME", dest="generate_service_available", action="append",
+generator_group.add_argument("-gsa", "--generate-service-available", metavar="NAME", dest="generate_service_available", action="append",
                              help="generate NAME service available templates")
 
 environment_group = parser.add_argument_group("environment variables")
@@ -711,7 +700,7 @@ environment_group.add_argument("-e", "--skip-env-files", dest="skip_env_files",
                                action="store_true",
                                help="skip getting environment variables values from .env file(s)")
 
-lifecycle_group = parser.add_argument_group("container lifecycle steps")
+lifecycle_group = parser.add_argument_group("container lifecycle")
 lifecycle_group.add_argument("-s", "--skip-startup", dest="skip_startup",
                              action="store_true",
                              help="skip running pre-startup-cmd and service(s) startup.sh script(s)")
@@ -724,7 +713,7 @@ lifecycle_group.add_argument("-f", "--skip-finish", dest="skip_finish",
 lifecycle_group.add_argument("-o", "--run-only", type=str, choices=["startup", "process", "finish"], dest="run_only",
                              help="run only this file type and ignore others")
 
-commands_group = parser.add_argument_group("commands lifecycle hooks")
+commands_group = parser.add_argument_group("commands hooks")
 commands_group.add_argument("-xps", "--pre-startup-cmd", metavar="COMMAND", dest="pre_startup_cmds", action="append",
                             help="run COMMAND before startup file(s)")
 commands_group.add_argument("-xpp", "--pre-process-cmd", metavar="COMMAND", dest="pre_process_cmds", action="append",
@@ -740,6 +729,8 @@ ci_cd_group.add_argument("-w", "--unsecure-fast-write", dest="unsecure_fast_writ
                          help="disable fsync and friends with eatmydata LD_PRELOAD library")
 
 debug_group = parser.add_argument_group("debugging")
+debug_group.add_argument("-d", "--debug", dest="debug", nargs="*", metavar="EXTRA PACKAGE",
+                         help="set log level to debug and install debug tools (curl less procps psmisc strace vim), set extra packages to install as argument")
 debug_group.add_argument("-k", "--no-kill-all-on-exit", dest="kill_all_on_exit",
                          action="store_false",
                          help="don't kill all processes on the system upon exiting")
@@ -756,17 +747,15 @@ logs_group.add_argument("-l", "--loglevel", type=str, choices=log_level_switcher
 
 args = parser.parse_args()
 
-# Print version and exists.
-if args.version:
-    print(get_container_image())
-    sys.exit(0)
-
 # Set logs level and output type.
+if args.debug is not None and log_level_switcher.get(args.log_level) < LOG_LEVEL_DEBUG:
+    args.log_level = log_level_switcher_inv.get(LOG_LEVEL_DEBUG)
+
 log_level = log_level_switcher.get(args.log_level)
 log_json = args.log_json
 
 # Generator options.
-# Must be called before set_dir_env and set_log_env,
+# Must be called before set_log_env,
 # so container environment variables are not replaced by envsubst-templates
 generator(args)
 
@@ -816,7 +805,7 @@ except KeyboardInterrupt:
 finally:
     if not args.skip_finish:
         run_cmds(args.pre_finish_cmds, "finish")
-        run_script_files(RUN_FINISH_DIR)
+        run_script_files(ENTRYPOINT_FINISH_DIR)
 
     if args.kill_all_on_exit:
         kill_all_processes(KILL_ALL_PROCESSES_TIMEOUT)

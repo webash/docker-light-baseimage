@@ -1,4 +1,4 @@
-@version: 3.25
+@version: 3.27
 @include "scl.conf"
 
 # Syslog-ng configuration file, compatible with default Debian syslogd
@@ -59,6 +59,14 @@ destination d_debug { file("/var/log/debug"); };
 destination d_error { file("/var/log/error"); };
 destination d_messages { file("/var/log/messages"); };
 
+# The root's console.
+#
+#destination d_console { usertty("root"); };
+
+# Virtual console.
+#
+#destination d_console_all { file(`tty10`); };
+
 # The named pipe /dev/xconsole is for the nsole' utility.  To use it,
 # you must invoke nsole' with the -file' option:
 #
@@ -74,7 +82,7 @@ destination d_xconsole { pipe("/dev/xconsole"); };
 destination d_ppp { file("/var/log/ppp.log"); };
 
 # stdout for docker
-destination d_stdout { ##SYSLOG_OUTPUT_MODE_DEV_STDOUT##("/dev/stdout"); };
+destination d_stdout { ${SYSLOG_OUTPUT_MODE_DEV_STDOUT}("/dev/stdout"); };
 
 ########################
 # Filters
@@ -141,6 +149,10 @@ log { source(s_src); filter(f_news); filter(f_notice); destination(d_newsnotice)
 log { source(s_src); filter(f_debug); destination(d_debug); };
 log { source(s_src); filter(f_error); destination(d_error); };
 log { source(s_src); filter(f_messages); destination(d_messages); };
+
+#log { source(s_src); filter(f_console); destination(d_console_all);
+				    destination(d_xconsole); };
+#log { source(s_src); filter(f_crit); destination(d_console); };
 
 # All messages send to a remote site
 #

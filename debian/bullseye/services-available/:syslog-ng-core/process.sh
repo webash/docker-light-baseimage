@@ -6,4 +6,4 @@ SYSLOGNG_OPTS=""
 
 [ -r /etc/default/syslog-ng ] && . /etc/default/syslog-ng
 
-exec /usr/sbin/syslog-ng --pidfile "$PIDFILE" -F $SYSLOGNG_OPTS
+exec /usr/sbin/syslog-ng --foreground --pidfile "${PIDFILE}" ${SYSLOGNG_OPTS}

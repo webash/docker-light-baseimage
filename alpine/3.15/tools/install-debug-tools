@@ -4,7 +4,7 @@ log-helper level eq trace && set -x
 # Usage:
 # install-debug-tool [extra package 1] [extra package 2] ...
 
-TO_INSTALL=(curl less procps psmisc strace vim-tiny)
+TO_INSTALL=(curl less procps psmisc strace vim)
 
 log-helper info "Install debug tools:" "${TO_INSTALL[@]}"
 

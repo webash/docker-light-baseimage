@@ -1,8 +1,10 @@
 #!/bin/bash -e
 log-helper level eq trace && set -x
 
+set -o pipefail
+
 # Usage:
 # packages-index-update
 
 log-helper info "Update packages index"
-apt -qy update 2>&1 | log-helper debug
+apt -qy update 2>&1 | log-helper info

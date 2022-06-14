@@ -1,0 +1,4 @@
+La commande « sduo » n'a pas été trouvée, voulez-vous dire :
+  commande « sudo » du deb sudo (1.9.9-1ubuntu2)
+  commande « sudo » du deb sudo-ldap (1.9.9-1ubuntu2)
+Essayez : sudo apt install <nom du deb>
