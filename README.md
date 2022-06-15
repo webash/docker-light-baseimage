@@ -34,6 +34,87 @@ docker run --rm osixia/light-baseimage:2.0.0-alpine --generate dockerfile
 
 Replace `--generate` with `--generate-multiprocess` to get a minimal multiprocess example templates and replace `dockerfile` with `dagger.io` to get a [dagger.io](https://dagger.io) example.
 
+## 🗂 Entrypoint options
+
+```
+docker run --rm osixia/light-baseimage:2.0.0 --help
+```
+
+```
+usage:  [-h] [-v] [-gen {dockerfile,dagger.io}] [-gmu {dockerfile,dagger.io}]
+        [-gse NAME] [-gsa NAME] [-e] [-s] [-p] [-f]
+        [-o {startup,process,finish}] [-xps COMMAND] [-xpp COMMAND]
+        [-xpf COMMAND] [-xpe COMMAND] [-w] [-d [EXTRA PACKAGE ...]] [-k] [-a]
+        [-j] [-l {none,error,warning,info,debug,trace}]
+        [MAIN_COMMAND ...]
+
+container image: osixia/light-baseimage:2.0.0
+
+positional arguments:
+  MAIN_COMMAND          the main command to run in addition of container
+                        processes, default: /bin/bash if the container have no
+                        process, none otherwise
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -v, --version         print container image version
+
+templates generator:
+  -gen {dockerfile,dagger.io}, --generate {dockerfile,dagger.io}
+                        generate base templates for single process image
+  -gmu {dockerfile,dagger.io}, --generate-multiprocess {dockerfile,dagger.io}
+                        generate base templates for multiprocess image
+  -gse NAME, --generate-service NAME
+                        generate NAME service templates
+  -gsa NAME, --generate-service-available NAME
+                        generate NAME service available templates
+
+environment variables:
+  -e, --skip-env-files  skip getting environment variables values from .env
+                        file(s)
+
+container lifecycle:
+  -s, --skip-startup    skip running pre-startup-cmd and service(s) startup.sh
+                        script(s)
+  -p, --skip-process    skip running pre-process-cmd and service(s) process.sh
+                        script(s)
+  -f, --skip-finish     skip running pre-finish-cmd and service(s) finish.sh
+                        script(s)
+  -o {startup,process,finish}, --run-only {startup,process,finish}
+                        run only this file type and ignore others
+
+commands hooks:
+  -xps COMMAND, --pre-startup-cmd COMMAND
+                        run COMMAND before startup file(s)
+  -xpp COMMAND, --pre-process-cmd COMMAND
+                        run COMMAND before process file(s)
+  -xpf COMMAND, --pre-finish-cmd COMMAND
+                        run COMMAND before finish file(s)
+  -xpe COMMAND, --pre-exit-cmd COMMAND
+                        run COMMAND before container exits
+
+ci/cd:
+  -w, --unsecure-fast-write
+                        disable fsync and friends with eatmydata LD_PRELOAD
+                        library
+
+debugging:
+  -d [EXTRA PACKAGE ...], --debug [EXTRA PACKAGE ...]
+                        set log level to debug and install debug tools (curl
+                        less procps psmisc strace vim) with optional extra
+                        packages passed in argument
+  -k, --no-kill-all-on-exit
+                        don't kill all processes on the system upon exiting
+  -a, --keep-alive      keep alive container after all processes have exited
+
+logging:
+  -j, --logjson         set log format to JSON.
+  -l {none,error,warning,info,debug,trace}, --loglevel {none,error,warning,info,debug,trace}
+                        set log level, default: info
+
+Built with osixia/light-baseimage (https://github.com/osixia/docker-light-baseimage) 🐳✨🌴
+```
+
 ## 🍹 First image in 2 minutes
 Generate single process image templates in the **light-baseimage-example** directory
 ```
@@ -145,7 +226,8 @@ docker run osixia/light-baseimage:alpine-2.0.0 --help
 Table of Contents
 - [osixia/light-baseimage:2.0.0 🐳✨🌴](#osixialight-baseimage200-)
   - [⚡ Quick Start](#-quick-start)
-  - [� First image in 2 minutes](#-first-image-in-2-minutes)
+  - [🗂 Entrypoint options](#-entrypoint-options)
+  - [🍹 First image in 2 minutes](#-first-image-in-2-minutes)
   - [📄 Documentation](#-documentation)
   - [♥ Contributing](#-contributing)
   - [🔓 License](#-license)
