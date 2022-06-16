@@ -176,19 +176,24 @@ def generator(args):
             error("Error creating %s directory" % VAR_GENERATOR_DIR)
             sys.exit(1)
 
-    if args.generate:
-        generate(args.generate)
+    try:
+        if args.generate:
+            generate(args.generate)
 
-    elif args.generate_multiprocess:
-        generate_multiprocess(args.generate_multiprocess)
+        elif args.generate_multiprocess:
+            generate_multiprocess(args.generate_multiprocess)
 
-    if args.generate_service:
-        for service in args.generate_service:
-            generate_service(service)
+        if args.generate_service:
+            for service in args.generate_service:
+                generate_service(service)
 
-    if args.generate_service_available:
-        for service_available in args.generate_service_available:
-            generate_service_available(service_available)
+        if args.generate_service_available:
+            for service_available in args.generate_service_available:
+                generate_service_available(service_available)
+
+    except Exception as e:
+            error("Error : %s" % e)
+            sys.exit(1)
 
     if generator_print_files:
         separator = "--------------------------------------------------------------------------------"
@@ -294,7 +299,7 @@ def generate_service(name, in_dir=None):
     with tempfile.TemporaryDirectory() as tmpdir:
         trace("Use temporary directory: %s" % tmpdir)
 
-        shutil.copytree(os.path.join(TEMPLATES_DIR, "services", "service"),
+        shutil.copytree(os.path.join(TEMPLATES_DIR, "services", "service-name"),
                         os.path.join(tmpdir, name))
 
         generate_envsubst_templates(tmpdir, in_dir, {"SERVICE_NAME": name})
@@ -309,7 +314,7 @@ def generate_service_available(name, in_dir=None):
         trace("Use temporary directory: %s" % tmpdir)
 
         shutil.copytree(os.path.join(
-            TEMPLATES_DIR, "services-available", "service-available"), os.path.join(tmpdir, name))
+            TEMPLATES_DIR, "services-available", "service-available-name"), os.path.join(tmpdir, name))
 
         generate_envsubst_templates(tmpdir, in_dir, {"SERVICE_NAME": name})
 
@@ -676,7 +681,7 @@ def main(args):
 
 
 # Command line options.
-parser = argparse.ArgumentParser(prog="", description="Container image: %s" % get_container_image(
+parser = argparse.ArgumentParser(prog="", description="container image: %s" % get_container_image(
 ), epilog="Built with osixia/light-baseimage (https://github.com/osixia/docker-light-baseimage) 🐳✨🌴")
 
 parser.add_argument("main_command", metavar="MAIN_COMMAND", type=str, nargs="*",
@@ -685,7 +690,7 @@ parser.add_argument("main_command", metavar="MAIN_COMMAND", type=str, nargs="*",
 parser.add_argument("-v", "--version", action='version',
                     version=get_container_image(), help="print container image version")
 
-generator_group = parser.add_argument_group("templates generator")
+generator_group = parser.add_argument_group("generator")
 generator_group.add_argument("-gen", "--generate", type=str, choices=["dockerfile", "dagger.io"], dest="generate",
                              help="generate base templates for single process image")
 generator_group.add_argument("-gmu", "--generate-multiprocess", type=str, choices=["dockerfile", "dagger.io"], dest="generate_multiprocess",
@@ -730,7 +735,7 @@ ci_cd_group.add_argument("-w", "--unsecure-fast-write", dest="unsecure_fast_writ
 
 debug_group = parser.add_argument_group("debugging")
 debug_group.add_argument("-d", "--debug", dest="debug", nargs="*", metavar="EXTRA PACKAGE",
-                         help="set log level to debug and install debug tools (curl less procps psmisc strace vim), set extra packages to install as argument")
+                         help="set log level to debug and install debug tools (curl less procps psmisc strace vim) with optional extra packages passed in argument")
 debug_group.add_argument("-k", "--no-kill-all-on-exit", dest="kill_all_on_exit",
                          action="store_false",
                          help="don't kill all processes on the system upon exiting")
@@ -741,7 +746,7 @@ debug_group.add_argument("-a", "--keep-alive", dest="keep_alive",
 logs_group = parser.add_argument_group("logging")
 logs_group.add_argument("-j", "--logjson", dest="log_json",
                         action="store_true",
-                        help="set log format to JSON.")
+                        help="set log format to json")
 logs_group.add_argument("-l", "--loglevel", type=str, choices=log_level_switcher.keys(), dest="log_level", default=log_level_switcher_inv.get(log_level),
                         help="set log level, default: %s" % log_level_switcher_inv.get(log_level))
 

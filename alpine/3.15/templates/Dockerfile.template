@@ -9,7 +9,7 @@ FROM ${CONTAINER_IMAGE_NAME}:${CONTAINER_IMAGE_TAG}
 
 RUN packages-index-update \
     && packages-install-clean \
-        [....]
+        [...]
 
 COPY services /container/services
 

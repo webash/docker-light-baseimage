@@ -690,7 +690,7 @@ parser.add_argument("main_command", metavar="MAIN_COMMAND", type=str, nargs="*",
 parser.add_argument("-v", "--version", action='version',
                     version=get_container_image(), help="print container image version")
 
-generator_group = parser.add_argument_group("templates generator")
+generator_group = parser.add_argument_group("generator")
 generator_group.add_argument("-gen", "--generate", type=str, choices=["dockerfile", "dagger.io"], dest="generate",
                              help="generate base templates for single process image")
 generator_group.add_argument("-gmu", "--generate-multiprocess", type=str, choices=["dockerfile", "dagger.io"], dest="generate_multiprocess",
@@ -746,7 +746,7 @@ debug_group.add_argument("-a", "--keep-alive", dest="keep_alive",
 logs_group = parser.add_argument_group("logging")
 logs_group.add_argument("-j", "--logjson", dest="log_json",
                         action="store_true",
-                        help="set log format to JSON.")
+                        help="set log format to json")
 logs_group.add_argument("-l", "--loglevel", type=str, choices=log_level_switcher.keys(), dest="log_level", default=log_level_switcher_inv.get(log_level),
                         help="set log level, default: %s" % log_level_switcher_inv.get(log_level))
 

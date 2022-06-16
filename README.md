@@ -59,7 +59,7 @@ optional arguments:
   -h, --help            show this help message and exit
   -v, --version         print container image version
 
-templates generator:
+generator:
   -gen {dockerfile,dagger.io}, --generate {dockerfile,dagger.io}
                         generate base templates for single process image
   -gmu {dockerfile,dagger.io}, --generate-multiprocess {dockerfile,dagger.io}
@@ -108,7 +108,7 @@ debugging:
   -a, --keep-alive      keep alive container after all processes have exited
 
 logging:
-  -j, --logjson         set log format to JSON.
+  -j, --logjson         set log format to json
   -l {none,error,warning,info,debug,trace}, --loglevel {none,error,warning,info,debug,trace}
                         set log level, default: info
 
@@ -172,6 +172,23 @@ docker build -t example/my-image:develop ./light-baseimage-example
 Run **example/my-image:develop** image
 ```
 docker run example/my-image:develop
+```
+```
+*** 2022-06-16T18:02:20.925194 |  INFO   | CONTAINER_LOG_LEVEL=3 (info) Increase log level to "debug" or "trace" to dump all container environment variables.
+*** 2022-06-16T18:02:20.925230 |  INFO   | CONTAINER_LOG_FORMAT=CONSOLE Run container with command argument --logjson to switch to JSON log format.
+*** 2022-06-16T18:02:20.944133 |  INFO   | Loading environment file /container/environment/00-default/.env...
+*** 2022-06-16T18:02:20.944680 |  INFO   | Running /container/entrypoint/startup/my-service...
+my-service: Doing some container first start setup...
+my-service: Doing some others container start setup...
+my-service: EXAMPLE_ENV_VAR=Hello :)...
+*** 2022-06-16T18:02:20.949115 |  INFO   | Running /container/entrypoint/process/my-service/run...
+my-service: Just going to sleep for a long time...
+
+[ press ctrl+c to stop process ]
+
+*** 2022-06-16T18:02:23.589513 |  INFO   | Running /container/entrypoint/finish/my-service...
+my-service: process ended...
+*** 2022-06-16T18:02:23.600556 |  INFO   | Killing all processes...
 ```
 
 ## 📄 Documentation
