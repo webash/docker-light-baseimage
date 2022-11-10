@@ -1,5 +1,5 @@
-NAME = osixia/light-baseimage
-VERSION = alpine-0.1.9
+NAME = webash/light-baseimage
+VERSION = alpine-3.16_osixia0.1.9
 
 .PHONY: build build-nocache test tag-latest push push-latest release git-tag-version
 
